@@ -1,13 +1,18 @@
-Minetest 0.4.7+ mod: Simple helicopter
+Minetest 5.1-dev+ mod: Simple helicopter
 =======================
-by Pavel_S
+originally by Pavel_S  
+reworked by DS-minetest
 
 License of source code:
 -----------------------
-GPL_v2
+original code by Pavel_S: GPL_v2  
+changes by DS-minetest: TODO  
+`matrix.lua` file: CC0
 
 License of media (textures and sounds):
 ---------------------------------------
 
 helicopter_motor.ogg by  Robinhood76 | License: Attribution Noncommercial
+
+textures and model are probably by Pavel_S, TODO
 
