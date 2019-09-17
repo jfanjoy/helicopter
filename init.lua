@@ -1,5 +1,21 @@
 
 --
+-- constants
+--
+
+local tilting_speed = 1
+local tilting_max = 0.5
+local power_max = 20
+local power_min = 0.2 -- if negative, the helicopter can actively fly downwards
+local wanted_vert_speed = 10
+local friction_air_quadratic = 0.01
+local friction_air_constant = 0.2
+local friction_land_quadratic = 1
+local friction_land_constant = 2
+local friction_water_quadratic = 0.1
+local friction_water_constant = 1
+
+--
 -- helpers and co.
 --
 
@@ -16,7 +32,18 @@ local function vector_length_sq(v)
 	return v.x * v.x + v.y * v.y + v.z * v.z
 end
 
-local function heli_control(self, dtime, touching_ground, vel_before)
+local function check_node_below(obj)
+	local pos_below = obj:get_pos()
+	pos_below.y = pos_below.y - 0.1
+	local node_below = minetest.get_node(pos_below).name
+	local nodedef = minetest.registered_nodes[node_below]
+	local touching_ground = not nodedef or -- unknown nodes are solid
+			nodedef.walkable or false
+	local liquid_below = not touching_ground and nodedef.liquidtype ~= "none"
+	return touching_ground, liquid_below
+end
+
+local function heli_control(self, dtime, touching_ground, liquid_below, vel_before)
 	local driver = minetest.get_player_by_name(self.driver_name)
 	if not driver then
 		-- there is no driver (eg. because driver left)
@@ -35,11 +62,15 @@ local function heli_control(self, dtime, touching_ground, vel_before)
 	local rot = self.object:get_rotation()
 
 	local vert_vel_goal = 0
-	if ctrl.jump then
-		vert_vel_goal = vert_vel_goal + 3.5
-	end
-	if ctrl.sneak then
-		vert_vel_goal = vert_vel_goal - 3.5
+	if not liquid_below then
+		if ctrl.jump then
+			vert_vel_goal = vert_vel_goal + wanted_vert_speed
+		end
+		if ctrl.sneak then
+			vert_vel_goal = vert_vel_goal - wanted_vert_speed
+		end
+	else
+		vert_vel_goal = wanted_vert_speed
 	end
 
 	-- rotation
@@ -57,21 +88,19 @@ local function heli_control(self, dtime, touching_ground, vel_before)
 		if ctrl.left then
 			tilting_goal.x = tilting_goal.x - 1
 		end
-		tilting_goal = vector.multiply(vector.normalize(tilting_goal), 0.5)
+		tilting_goal = vector.multiply(vector.normalize(tilting_goal), tilting_max)
 
 		-- tilting
-		local tilting_current = self.tilting
-		if vector_length_sq(vector.subtract(tilting_goal, tilting_current)) > dtime * dtime then
-			tilting_current = vector.add(tilting_current,
-					vector.multiply(vector.direction(tilting_current, tilting_goal), dtime))
+		if vector_length_sq(vector.subtract(tilting_goal, self.tilting)) > (dtime * tilting_speed)^2 then
+			self.tilting = vector.add(self.tilting,
+					vector.multiply(vector.direction(self.tilting, tilting_goal), dtime * tilting_speed))
 		else
-			tilting_current = tilting_goal
+			self.tilting = tilting_goal
 		end
-		if vector_length_sq(tilting_current) > 1 then
-			tilting_current = vector.normalize(tilting_current)
+		if vector_length_sq(self.tilting) > tilting_max^2 then
+			self.tilting = vector.multiply(vector.normalize(self.tilting), tilting_max)
 		end
-		self.tilting = tilting_current
-		local new_up = vector.new(tilting_current)
+		local new_up = vector.new(self.tilting)
 		new_up.y = 1
 		new_up = vector.normalize(new_up) -- this is what vector_up should be after the rotation
 		local new_right = vector.cross(new_up, vector_forward)
@@ -88,12 +117,15 @@ local function heli_control(self, dtime, touching_ground, vel_before)
 	else
 		rot.x = 0
 		rot.z = 0
+		self.tilting.x = 0
+		self.tilting.z = 0
 	end
 
 	self.object:set_rotation(rot)
 
-
+	-- calculate how strong the heli should accelerate towards rotated up
 	local power = vert_vel_goal - vel_before.y + gravity * dtime
+	power = math.min(math.max(power, power_min * dtime), power_max * dtime)
 	local rotated_up = matrix3.multiply(matrix3.from_pitch_yaw_roll(rot), vector_up)
 	local added_vel = vector.multiply(rotated_up, power)
 	added_vel = vector.add(added_vel, vector.multiply(vector_up, -gravity * dtime))
@@ -130,28 +162,37 @@ minetest.register_entity("helicopter:heli", {
 	end,
 
 	on_step = function(self, dtime)
-		local pos_below = self.object:get_pos()
-		pos_below.y = pos_below.y - 0.1
-		local node_below = minetest.get_node(pos_below).name
-		local nodedef = minetest.registered_nodes[node_below]
-		local touching_ground = not nodedef or -- unknown nodes are solid
-				nodedef.walkable
+		local touching_ground, liquid_below
 
 		local vel = self.object:get_velocity()
+
 		if self.driver_name then
-			vel = heli_control(self, dtime, touching_ground, vel) or vel
+			touching_ground, liquid_below = check_node_below(self.object)
+			vel = heli_control(self, dtime, touching_ground, liquid_below, vel) or vel
+		end
+
+		if vel.x == 0 and vel.y == 0 and vel.z == 0 then
+			return
+		end
+
+		if touching_ground == nil then
+			touching_ground, liquid_below = check_node_below(self.object)
 		end
 
 		-- quadratic and constant deceleration
 		local speedsq = vector_length_sq(vel)
+		local fq, fc
+		if touching_ground then
+			fq, fc = friction_land_quadratic, friction_land_constant
+		elseif liquid_below then
+			fq, fc = friction_water_quadratic, friction_water_constant
+		else
+			fq, fc = friction_air_quadratic, friction_air_constant
+		end
 		vel = vector.apply(vel, function(a)
 			local s = math.sign(a)
 			a = math.abs(a)
-			if not touching_ground then
-				a = math.max(0, a - 0.01 * dtime * speedsq - 0.2 * dtime)
-			else
-				a = math.max(0, a - 1 * dtime * speedsq - 2 * dtime)
-			end
+			a = math.max(0, a - fq * dtime * speedsq - fc * dtime)
 			return a * s
 		end)
 
@@ -230,7 +271,6 @@ minetest.register_entity("helicopter:heli", {
 		end
 	end,
 })
-
 
 --
 -- items
