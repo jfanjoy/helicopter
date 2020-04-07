@@ -22,6 +22,8 @@ License of media (textures and sounds):
 
 helicopter_motor.ogg by  Robinhood76 | License: Attribution Noncommercial  
 
+helicopter_water_driblet.png by DS | License: CC0
+
 helicopter model and texture:  
 
 Bell47 is a FREE 3D model made by Melkor (https://forum.minetest.net/memberlist.php?mode=viewprofile&u=301) for the free game "Minetest" and is released under CC-BY-NC-SA 3.0 http://creativecommons.org/licenses/by-nc-sa/3.0/  
