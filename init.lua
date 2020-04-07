@@ -143,9 +143,8 @@ minetest.register_entity("helicopter:heli", {
 		collisionbox = {-1,0,-1, 1,0.3,1},
 		selectionbox = {-1,0,-1, 1,0.3,1},
 		visual = "mesh",
-		mesh = "helicopter_heli.x",
-		textures = {"helicopter_blades.png", "helicopter_blades.png",
-				"helicopter_heli.png", "helicopter_glass.png"},
+		mesh = "helicopter_heli.b3d",
+		textures = {"helicopter_heli.png"},
 	},
 
 	driver_name = nil,
@@ -216,6 +215,7 @@ minetest.register_entity("helicopter:heli", {
 		if self.driver_name then
 			-- detach the driver first (puncher must be driver)
 			puncher:set_detach()
+			puncher:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
 			player_api.player_attached[name] = nil
 			-- player should stand again
 			player_api.set_animation(puncher, "stand")
@@ -243,6 +243,7 @@ minetest.register_entity("helicopter:heli", {
 			self.object:set_animation_frame_speed(0)
 			-- detach the player
 			clicker:set_detach()
+			clicker:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
 			player_api.player_attached[name] = nil
 			-- player should stand again
 			player_api.set_animation(clicker, "stand")
@@ -257,7 +258,8 @@ minetest.register_entity("helicopter:heli", {
 					{object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
 			self.object:set_animation_frame_speed(30)
 			-- attach the driver
-			clicker:set_attach(self.object, "", {x = 0, y = 6.7, z = -4}, {x = 0, y = 0, z = 0})
+			clicker:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
+			clicker:set_eye_offset({x = 0, y = 7, z = 2}, {x = 0, y = 8, z = -5})
 			player_api.player_attached[name] = true
 			-- make the driver sit
 			minetest.after(0.2, function()
