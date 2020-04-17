@@ -1,12 +1,17 @@
-Minetest 5.1-dev+ mod: Simple helicopter
+Minetest 5.1-dev+ mod: Not So Simple helicopter
 ========================================
-originally by Pavel_S  
+originally Simple helicopter by Pavel_S  
 reworked by DS  
+re-reworked by A_Percy
 
 Todo:
 -----
 
-- Replace craftitems and recipes
+- Replace craft system - add battery support too
+- Add ceiling limmit according with energy consumption
+- Add auto-rotation mode when without any energy
+- Maybe add ADF orientation
+- Analyse viability of putting energy indicator and power consumption
 - Add screenshot and description
 - Add code license
 - Fix that z-fighting
@@ -26,8 +31,6 @@ helicopter_water_driblet.png by DS | License: CC0
 
 helicopter model and texture:  
 
-Bell47 is a FREE 3D model made by Melkor (https://forum.minetest.net/memberlist.php?mode=viewprofile&u=301) for the free game "Minetest" and is released under CC-BY-NC-SA 3.0 http://creativecommons.org/licenses/by-nc-sa/3.0/  
-For more information, see Licence.txt  
-(+ Modified by DS)  
+Helicube is a model made by Alexsandro Percy, based in original model aesthetic but made from zero  
 
 the item textures are probably by Pavel_S, TODO  
