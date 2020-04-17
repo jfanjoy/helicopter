@@ -4,7 +4,7 @@
 --
 
 local tilting_speed = 1
-local tilting_max = 0.5
+local tilting_max = 0.4
 local power_max = 20
 local power_min = 0.2 -- if negative, the helicopter can actively fly downwards
 local wanted_vert_speed = 10
@@ -144,7 +144,7 @@ minetest.register_entity("helicopter:heli", {
 		selectionbox = {-1,0,-1, 1,0.3,1},
 		visual = "mesh",
 		mesh = "helicopter_heli.b3d",
-		textures = {"helicopter_heli.png"},
+		textures = {"black.png", "interior_black.png", "strips.png", "painting.png", "painting.png", "interior_black.png", "aluminum.png", "painting.png", "heli_glass.png", "heli_glass.png", "interior.png", "interior_black.png", "black.png", "painting.png", "interior_black.png", "helicopter_heli.png", "helicopter_heli.png", "colective.png", "painting.png", "painting.png",},
 	},
 
 	driver_name = nil,
@@ -259,7 +259,7 @@ minetest.register_entity("helicopter:heli", {
 			self.object:set_animation_frame_speed(30)
 			-- attach the driver
 			clicker:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
-			clicker:set_eye_offset({x = 0, y = 7, z = 2}, {x = 0, y = 8, z = -5})
+			clicker:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
 			player_api.player_attached[name] = true
 			-- make the driver sit
 			minetest.after(0.2, function()
@@ -325,9 +325,9 @@ if minetest.get_modpath("default") then
 	minetest.register_craft({
 		output = "helicopter:cabin",
 		recipe = {
-			{"",           "group:wood",           ""},
+			{"", "default:steel_ingot", ""},
 			{"group:wood", "default:mese_crystal", "default:glass"},
-			{"group:wood", "group:wood",           "group:wood"},
+			{"group:wood", "default:steel_ingot",           "group:wood"},
 		}
 	})
 	minetest.register_craft({
