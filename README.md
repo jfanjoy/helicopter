@@ -7,7 +7,11 @@ re-reworked by A_Percy
 Todo:
 -----
 
-- Replace craft
+- Replace craft system - add battery support too
+- Add ceiling limmit according with energy consumption
+- Add auto-rotation mode when without any energy
+- Maybe add ADF orientation
+- Analyse viability of putting energy indicator and power consumption
 - Add screenshot and description
 - Add code license
 - Fix that z-fighting
