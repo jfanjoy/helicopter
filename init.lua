@@ -144,7 +144,7 @@ minetest.register_entity("helicopter:heli", {
 		selectionbox = {-1,0,-1, 1,0.3,1},
 		visual = "mesh",
 		mesh = "helicopter_heli.b3d",
-		textures = {"black.png", "interior_black.png", "strips.png", "painting.png", "painting.png", "interior_black.png", "aluminum.png", "painting.png", "heli_glass.png", "heli_glass.png", "interior.png", "interior_black.png", "black.png", "painting.png", "interior_black.png", "helicopter_heli.png", "helicopter_heli.png", "colective.png", "painting.png", "painting.png",},
+		textures = {"black.png", "interior_black.png", "strips.png", "painting.png", "painting.png", "interior_black.png", "aluminum.png", "painting.png", "heli_glass.png", "heli_glass.png", "interior.png", "interior_black.png", "painting.png", "interior_black.png", "helicopter_heli.png", "helicopter_heli.png", "colective.png", "painting.png", "painting.png",},
 	},
 
 	driver_name = nil,
