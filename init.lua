@@ -1,4 +1,3 @@
-
 --
 -- constants
 --
@@ -32,6 +31,13 @@ local function vector_length_sq(v)
 	return v.x * v.x + v.y * v.y + v.z * v.z
 end
 
+local function get_pointer_angle(energy)
+    local angle = energy * 18
+    angle = angle - 90
+    angle = angle * -1
+	return angle
+end
+
 local function check_node_below(obj)
 	local pos_below = obj:get_pos()
 	pos_below.y = pos_below.y - 0.1
@@ -41,6 +47,71 @@ local function check_node_below(obj)
 			nodedef.walkable or false
 	local liquid_below = not touching_ground and nodedef.liquidtype ~= "none"
 	return touching_ground, liquid_below
+end
+
+local function load_fuel(self, player_name)
+    local player = minetest.get_player_by_name(player_name)
+    local inv = player:get_inventory()
+    local fuel, inventory_fuel
+    inventory_fuel = "basic_machines:power_block"
+    if inv:contains_item("main", inventory_fuel) then
+	    self.energy = 10
+        local energyangle = get_pointer_angle(self.energy)
+        self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energyangle})
+
+	    --sound and animation
+        -- first stop all
+	    minetest.sound_stop(self.sound_handle)
+	    self.sound_handle = nil
+	    self.object:set_animation_frame_speed(0)
+        -- start now
+	    self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
+			    {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
+	    self.object:set_animation_frame_speed(30)
+	    -- disable gravity
+	    self.object:set_acceleration(vector.new())
+        --
+	end
+
+
+
+
+	--[[local arrow, inventory_arrow
+	if type(def.arrows) == 'table' then --more than one arrow?
+		for i = 1, #def.arrows do
+			arrow = def.arrows[i]
+			inventory_arrow = minetest.registered_entities[arrow].inventory_arrow_name
+			if inv:contains_item("main", inventory_arrow) then
+				break
+			end
+		end
+	else
+		arrow = def.arrows
+		inventory_arrow = minetest.registered_entities[def.arrows].inventory_arrow_name
+	end
+	if not inventory_arrow then
+		return
+	end
+	if not inv:remove_item("main", inventory_arrow):is_empty() then
+		minetest.after(def.charge_time or 0, function(user, name)
+			local wielded_item = user:get_wielded_item()
+			local wielded_item_name = wielded_item:get_name()
+			if wielded_item_name == name then
+				local meta = wielded_item:get_meta()
+				meta:set_string("rcbows:charged_arrow", arrow) --save the arrow in the meta
+				wielded_item:set_name(name .. "_charged")
+				user:set_wielded_item(wielded_item)
+			end
+		end, user, name)
+		if def.sounds then
+			local user_pos = user:get_pos()
+			if not def.sounds.soundfile_draw_bow then
+				def.sounds.soundfile_draw_bow = "rcbows_draw_bow"
+			end
+			rcbows.make_sound("pos", user_pos, def.sounds.soundfile_draw_bow, DEFAULT_GAIN, DEFAULT_MAX_HEAR_DISTANCE)
+		end
+		return itemstack
+	end]]--
 end
 
 local function heli_control(self, dtime, touching_ground, liquid_below, vel_before)
@@ -126,6 +197,27 @@ local function heli_control(self, dtime, touching_ground, liquid_below, vel_befo
 	-- calculate how strong the heli should accelerate towards rotated up
 	local power = vert_vel_goal - vel_before.y + gravity * dtime
 	power = math.min(math.max(power, power_min * dtime), power_max * dtime)
+    local touching_ground, liquid_below = check_node_below(self.object)
+
+    -- calculate energy consumption --
+    if self.energy > 0 and touching_ground == false then
+        self.energy = self.energy - (power/100);
+        local energyangle = get_pointer_angle(self.energy)
+        self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energyangle})
+    end
+    if self.energy <= 0 then
+        power = 0.2
+		if touching_ground or liquid_below then
+            --criar uma fucao pra isso pois ela repete na linha 268
+			-- sound and animation
+			minetest.sound_stop(self.sound_handle)
+			self.object:set_animation_frame_speed(0)
+			-- gravity
+			self.object:set_acceleration(vector.multiply(vector_up, -gravity))
+		end
+    end
+    -- end energy consumption --
+
 	local rotated_up = matrix3.multiply(matrix3.from_pitch_yaw_roll(rot), vector_up)
 	local added_vel = vector.multiply(rotated_up, power)
 	added_vel = vector.add(added_vel, vector.multiply(vector_up, -gravity * dtime))
@@ -144,14 +236,21 @@ minetest.register_entity("helicopter:heli", {
 		selectionbox = {-1,0,-1, 1,0.3,1},
 		visual = "mesh",
 		mesh = "helicopter_heli.b3d",
-		textures = {"interior_black.png", "strips.png", "painting.png", "black.png", "aluminum.png", "heli_glass.png", "heli_glass.png", "interior.png", "interior_black.png", "helicopter_heli.png", "helicopter_heli.png", "colective.png", "painting.png"},
+        textures = {"interior_black.png", "strips.png", "painting.png", "black.png", "aluminum.png", "heli_glass.png", "heli_glass.png", "interior.png", "panel.png", "colective.png", "painting.png", "rotors.png", "interior_black.png",},
 	},
 
 	driver_name = nil,
 	sound_handle = nil,
 	tilting = vector.new(),
+    energy = 0,
 
 	on_activate = function(self)
+        local pos = self.object:get_pos()
+	    local pointer=minetest.add_entity(pos,'helicopter:pointer')
+        local angle = get_pointer_angle(self.energy)
+	    pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=angle})
+	    self.pointer = pointer
+
 		-- set the animation once and later only change the speed
 		self.object:set_animation({x = 0, y = 11}, 0, 0, true)
 
@@ -203,28 +302,41 @@ minetest.register_entity("helicopter:heli", {
 			return
 		end
 		local name = puncher:get_player_name()
-		if self.driver_name and self.driver_name ~= name then
+        	
+        if self.driver_name and self.driver_name ~= name then
 			-- do not allow other players to remove the object while there is a driver
 			return
 		end
 
-		if self.sound_handle then
-			minetest.sound_stop(self.sound_handle)
-			self.sound_handle = nil
-		end
-		if self.driver_name then
-			-- detach the driver first (puncher must be driver)
-			puncher:set_detach()
-			puncher:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
-			player_api.player_attached[name] = nil
-			-- player should stand again
-			player_api.set_animation(puncher, "stand")
-			self.driver_name = nil
-		end
+        local touching_ground, liquid_below = check_node_below(self.object)
+        
+        if self.driver_name and self.driver_name == name and touching_ground then
+            --refuel
+            load_fuel(self, puncher:get_player_name())
+        end
 
-		self.object:remove()
+        if self.driver_name == nil then
+            --remove only when the pilot is not attached to the helicopter
+		    if self.sound_handle then
+			    minetest.sound_stop(self.sound_handle)
+			    self.sound_handle = nil
+		    end
+		    if self.driver_name then
+			    -- detach the driver first (puncher must be driver)
+			    puncher:set_detach()
+			    puncher:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
+			    player_api.player_attached[name] = nil
+			    -- player should stand again
+			    player_api.set_animation(puncher, "stand")
+			    self.driver_name = nil
+		    end
 
-		minetest.handle_node_drops(self.object:get_pos(), {"helicopter:heli"}, puncher)
+            if self.pointer then self.pointer:remove() end
+		    self.object:remove()
+
+		    minetest.handle_node_drops(self.object:get_pos(), {"helicopter:heli"}, puncher)
+        end
+        
 	end,
 
 	on_rightclick = function(self, clicker)
@@ -338,3 +450,33 @@ if minetest.get_modpath("default") then
 		}
 	})
 end
+
+
+--
+-- fuel
+--
+
+minetest.register_entity('helicopter:pointer',{
+initial_properties = {
+	physical = false,
+	collide_with_objects=false,
+	pointable=false,
+	visual = "mesh",
+	mesh = "pointer.b3d",
+	textures = {"clay.png"},
+	},
+	
+on_activate = function(self,std)
+	self.sdata = minetest.deserialize(std) or {}
+	if self.sdata.remove then self.object:remove() end
+end,
+	
+get_staticdata=function(self)
+  	
+  self.sdata.remove=true
+  return minetest.serialize(self.sdata)
+end,
+	
+})
+
+
