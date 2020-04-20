@@ -169,7 +169,7 @@ local function heli_control(self, dtime, touching_ground, liquid_below, vel_befo
         local altitude_consumption_variable = 0
 
         -- if gaining altitude, it consumes more power
-        local y_pos_reference = position.y - 80 --after altitude 80 the power need will increase
+        local y_pos_reference = position.y - 100 --after altitude 100 the power need will increase
         if y_pos_reference > 0 then altitude_consumption_variable = ((y_pos_reference/1000)^2) end
 
         local consumed_power = (power/180) + altitude_consumption_variable
@@ -210,7 +210,7 @@ minetest.register_entity("helicopter:heli", {
 		selectionbox = {-1,0,-1, 1,0.3,1},
 		visual = "mesh",
 		mesh = "helicopter_heli.b3d",
-        textures = {"interior_black.png", "strips.png", "painting.png", "black.png", "aluminum.png", "heli_glass.png", "heli_glass.png", "interior.png", "panel.png", "colective.png", "painting.png", "rotors.png", "interior_black.png",},
+        textures = {"interior_black.png", "metal.png", "strips.png", "painting.png", "black.png", "aluminum.png", "heli_glass.png", "heli_glass.png", "interior.png", "panel.png", "colective.png", "painting.png", "rotors.png", "interior_black.png",},
 	},
 
 	driver_name = nil,
