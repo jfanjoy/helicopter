@@ -1,4 +1,4 @@
 player_api
-technic
+basic_machines
 default?
 creative?

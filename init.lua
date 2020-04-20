@@ -50,31 +50,35 @@ local function check_node_below(obj)
 end
 
 local function load_fuel(self, player_name)
-    local player = minetest.get_player_by_name(player_name)
-    local inv = player:get_inventory()
-    local fuel, inventory_fuel
-    inventory_fuel = "basic_machines:power_block"
-    if inv:contains_item("main", inventory_fuel) then
-        local stack    = ItemStack("basic_machines:power_block 1")
-        local taken = inv:remove_item("main", stack)
+    if self.energy < 9.5 then 
+        local player = minetest.get_player_by_name(player_name)
+        local inv = player:get_inventory()
+        local fuel, inventory_fuel
+        inventory_fuel = "basic_machines:power_block"
+        if inv:contains_item("main", inventory_fuel) then
+            local stack    = ItemStack("basic_machines:power_block 1")
+            local taken = inv:remove_item("main", stack)
 
-	    self.energy = 10
-        local energy_indicator_angle = get_pointer_angle(self.energy)
-        self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
+	        self.energy = 10
+            local energy_indicator_angle = get_pointer_angle(self.energy)
+            self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
 
-	    --sound and animation
-        -- first stop all
-	    minetest.sound_stop(self.sound_handle)
-	    self.sound_handle = nil
-	    self.object:set_animation_frame_speed(0)
-        -- start now
-	    self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
-			    {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
-	    self.object:set_animation_frame_speed(30)
-	    -- disable gravity
-	    self.object:set_acceleration(vector.new())
-        --
-	end
+	        --sound and animation
+            -- first stop all
+	        minetest.sound_stop(self.sound_handle)
+	        self.sound_handle = nil
+	        self.object:set_animation_frame_speed(0)
+            -- start now
+	        self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
+			        {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
+	        self.object:set_animation_frame_speed(30)
+	        -- disable gravity
+	        self.object:set_acceleration(vector.new())
+            --
+	    end
+    else
+        print("Full tank.")
+    end
 end
 
 local function heli_control(self, dtime, touching_ground, liquid_below, vel_before)
@@ -164,6 +168,7 @@ local function heli_control(self, dtime, touching_ground, liquid_below, vel_befo
 
 
     -- calculate energy consumption --
+    ----------------------------------
     if self.energy > 0 and touching_ground == false then
         local position = self.object:get_pos()
         local altitude_consumption_variable = 0
@@ -189,6 +194,7 @@ local function heli_control(self, dtime, touching_ground, liquid_below, vel_befo
 			self.object:set_acceleration(vector.multiply(vector_up, -gravity))
 		end
     end
+    ----------------------------
     -- end energy consumption --
 
 

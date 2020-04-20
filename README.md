@@ -4,16 +4,10 @@ originally Simple helicopter by Pavel_S
 reworked by DS  
 re-reworked by A_Percy
 
-Todo:
------
-
-- Maybe add ADF orientation
-- Add screenshot and description
-
 License of source code:
 -----------------------
 original code by Pavel_S: GPL_v2 (see file LICENSE)  
-changes / complete rework by DS: License to be chosen  
+changes / complete rework by DS and A_Percy
 `matrix.lua` file: CC0  
 
 License of media (textures and sounds):
