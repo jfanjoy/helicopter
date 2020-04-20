@@ -55,9 +55,12 @@ local function load_fuel(self, player_name)
     local fuel, inventory_fuel
     inventory_fuel = "basic_machines:power_block"
     if inv:contains_item("main", inventory_fuel) then
+        local stack    = ItemStack("basic_machines:power_block 1")
+        local taken = inv:remove_item("main", stack)
+
 	    self.energy = 10
-        local energyangle = get_pointer_angle(self.energy)
-        self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energyangle})
+        local energy_indicator_angle = get_pointer_angle(self.energy)
+        self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
 
 	    --sound and animation
         -- first stop all
@@ -72,46 +75,6 @@ local function load_fuel(self, player_name)
 	    self.object:set_acceleration(vector.new())
         --
 	end
-
-
-
-
-	--[[local arrow, inventory_arrow
-	if type(def.arrows) == 'table' then --more than one arrow?
-		for i = 1, #def.arrows do
-			arrow = def.arrows[i]
-			inventory_arrow = minetest.registered_entities[arrow].inventory_arrow_name
-			if inv:contains_item("main", inventory_arrow) then
-				break
-			end
-		end
-	else
-		arrow = def.arrows
-		inventory_arrow = minetest.registered_entities[def.arrows].inventory_arrow_name
-	end
-	if not inventory_arrow then
-		return
-	end
-	if not inv:remove_item("main", inventory_arrow):is_empty() then
-		minetest.after(def.charge_time or 0, function(user, name)
-			local wielded_item = user:get_wielded_item()
-			local wielded_item_name = wielded_item:get_name()
-			if wielded_item_name == name then
-				local meta = wielded_item:get_meta()
-				meta:set_string("rcbows:charged_arrow", arrow) --save the arrow in the meta
-				wielded_item:set_name(name .. "_charged")
-				user:set_wielded_item(wielded_item)
-			end
-		end, user, name)
-		if def.sounds then
-			local user_pos = user:get_pos()
-			if not def.sounds.soundfile_draw_bow then
-				def.sounds.soundfile_draw_bow = "rcbows_draw_bow"
-			end
-			rcbows.make_sound("pos", user_pos, def.sounds.soundfile_draw_bow, DEFAULT_GAIN, DEFAULT_MAX_HEAR_DISTANCE)
-		end
-		return itemstack
-	end]]--
 end
 
 local function heli_control(self, dtime, touching_ground, liquid_below, vel_before)
@@ -199,11 +162,20 @@ local function heli_control(self, dtime, touching_ground, liquid_below, vel_befo
 	power = math.min(math.max(power, power_min * dtime), power_max * dtime)
     local touching_ground, liquid_below = check_node_below(self.object)
 
+
     -- calculate energy consumption --
     if self.energy > 0 and touching_ground == false then
-        self.energy = self.energy - (power/100);
-        local energyangle = get_pointer_angle(self.energy)
-        self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energyangle})
+        local position = self.object:get_pos()
+        local altitude_consumption_variable = 0
+
+        -- if gaining altitude, it consumes more power
+        if position.y > 0 then altitude_consumption_variable = ((position.y/1000)^2) end
+
+        local consumed_power = (power/500) + altitude_consumption_variable
+        self.energy = self.energy - consumed_power;
+
+        local energy_indicator_angle = get_pointer_angle(self.energy)
+        self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
     end
     if self.energy <= 0 then
         power = 0.2
@@ -217,6 +189,7 @@ local function heli_control(self, dtime, touching_ground, liquid_below, vel_befo
 		end
     end
     -- end energy consumption --
+
 
 	local rotated_up = matrix3.multiply(matrix3.from_pitch_yaw_roll(rot), vector_up)
 	local added_vel = vector.multiply(rotated_up, power)
@@ -247,8 +220,8 @@ minetest.register_entity("helicopter:heli", {
 	on_activate = function(self)
         local pos = self.object:get_pos()
 	    local pointer=minetest.add_entity(pos,'helicopter:pointer')
-        local angle = get_pointer_angle(self.energy)
-	    pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=angle})
+        local energy_indicator_angle = get_pointer_angle(self.energy)
+	    pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
 	    self.pointer = pointer
 
 		-- set the animation once and later only change the speed
@@ -430,16 +403,16 @@ if minetest.get_modpath("default") then
 		output = "helicopter:blades",
 		recipe = {
 			{"",                    "default:steel_ingot", ""},
-			{"default:steel_ingot", "group:stick",         "default:steel_ingot"},
+			{"default:steel_ingot", "default:diamond",         "default:steel_ingot"},
 			{"",                    "default:steel_ingot", ""},
 		}
 	})
 	minetest.register_craft({
 		output = "helicopter:cabin",
 		recipe = {
-			{"", "default:steel_ingot", ""},
-			{"group:wood", "default:mese_crystal", "default:glass"},
-			{"group:wood", "default:steel_ingot",           "group:wood"},
+			{"basic_machines:battery", "basic_machines:generator", ""},
+			{"default:steelblock", "default:mese_block", "default:glass"},
+			{"default:steelblock", "xpanes:bar_flat", "xpanes:bar_flat"},
 		}
 	})
 	minetest.register_craft({
