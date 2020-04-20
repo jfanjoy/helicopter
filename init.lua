@@ -231,9 +231,14 @@ minetest.register_entity("helicopter:heli", {
 	driver_name = nil,
 	sound_handle = nil,
 	tilting = vector.new(),
-    energy = 0,
+    energy = 0.001,
 
-	on_activate = function(self)
+	on_activate = function(self, staticdata, dtime_s)
+        if staticdata ~= "" and staticdata ~= nil then
+            local data = minetest.deserialize(staticdata) or {}
+            self.energy = data.stored_energy
+            minetest.debug("loaded: ", self.energy)
+        end
         local pos = self.object:get_pos()
 	    local pointer=minetest.add_entity(pos,'helicopter:pointer')
         local energy_indicator_angle = get_pointer_angle(self.energy)
@@ -247,6 +252,12 @@ minetest.register_entity("helicopter:heli", {
 
 		self.object:set_acceleration(vector.multiply(vector_up, -gravity))
 	end,
+
+    get_staticdata = function(self) -- unloaded/unloads ... is now saved
+        return minetest.serialize({
+            stored_energy = self.energy,
+        })
+    end,
 
 	on_step = function(self, dtime)
 		local touching_ground, liquid_below
