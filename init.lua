@@ -169,9 +169,10 @@ local function heli_control(self, dtime, touching_ground, liquid_below, vel_befo
         local altitude_consumption_variable = 0
 
         -- if gaining altitude, it consumes more power
-        if position.y > 0 then altitude_consumption_variable = ((position.y/1000)^2) end
+        local y_pos_reference = position.y - 80 --after altitude 80 the power need will increase
+        if y_pos_reference > 0 then altitude_consumption_variable = ((y_pos_reference/1000)^2) end
 
-        local consumed_power = (power/500) + altitude_consumption_variable
+        local consumed_power = (power/180) + altitude_consumption_variable
         self.energy = self.energy - consumed_power;
 
         local energy_indicator_angle = get_pointer_angle(self.energy)
