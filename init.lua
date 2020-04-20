@@ -49,6 +49,15 @@ local function check_node_below(obj)
 	return touching_ground, liquid_below
 end
 
+local function check_is_under_water(obj)
+	local pos_up = obj:get_pos()
+	pos_up.y = pos_up.y + 0.1
+	local node_up = minetest.get_node(pos_up).name
+	local nodedef = minetest.registered_nodes[node_up]
+	local liquid_up = nodedef.liquidtype ~= "none"
+	return liquid_up
+end
+
 local function load_fuel(self, player_name)
     if self.energy < 9.5 then 
         local player = minetest.get_player_by_name(player_name)
@@ -343,25 +352,30 @@ minetest.register_entity("helicopter:heli", {
 			self.object:set_acceleration(vector.multiply(vector_up, -gravity))
 
 		elseif not self.driver_name then
-			-- no driver => clicker is new driver
-			self.driver_name = name
-			-- sound and animation
-			self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
-					{object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
-			self.object:set_animation_frame_speed(30)
-			-- attach the driver
-			clicker:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
-			clicker:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
-			player_api.player_attached[name] = true
-			-- make the driver sit
-			minetest.after(0.2, function()
-				local player = minetest.get_player_by_name(name)
-				if player then
-					player_api.set_animation(player, "sit")
-				end
-			end)
-			-- disable gravity
-			self.object:set_acceleration(vector.new())
+            local is_under_water = check_is_under_water(self.object)
+            if is_under_water then
+                print("Under water, no way!")
+            else
+			    -- no driver => clicker is new driver
+			    self.driver_name = name
+			    -- sound and animation
+			    self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
+					    {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
+			    self.object:set_animation_frame_speed(30)
+			    -- attach the driver
+			    clicker:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
+			    clicker:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
+			    player_api.player_attached[name] = true
+			    -- make the driver sit
+			    minetest.after(0.2, function()
+				    local player = minetest.get_player_by_name(name)
+				    if player then
+					    player_api.set_animation(player, "sit")
+				    end
+			    end)
+			    -- disable gravity
+			    self.object:set_acceleration(vector.new())
+            end
 		end
 	end,
 })
