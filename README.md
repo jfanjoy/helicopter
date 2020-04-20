@@ -1,4 +1,4 @@
-Minetest 5.1-dev+ mod: Not So Simple helicopter
+Minetest 5.1 mod: Not So Simple helicopter
 ========================================
 originally Simple helicopter by Pavel_S  
 reworked by DS  
@@ -7,14 +7,8 @@ re-reworked by A_Percy
 Todo:
 -----
 
-- Replace craft system - add battery support too
-- Add ceiling limmit according with energy consumption
-- Add auto-rotation mode when without any energy
 - Maybe add ADF orientation
-- Analyse viability of putting energy indicator and power consumption
 - Add screenshot and description
-- Add code license
-- Fix that z-fighting
 
 License of source code:
 -----------------------
@@ -31,6 +25,6 @@ helicopter_water_driblet.png by DS | License: CC0
 
 helicopter model and texture:  
 
-Helicube is a model made by Alexsandro Percy, based in original model aesthetic but made from zero. But using on rotors a texture from 3D model made by Melkor (for while).  
+Helicube is a model made by Alexsandro Percy, based in original model aesthetic but made from zero. But using on rotors an adaptation of the texture from 3D model made by Melkor.  
 
 the item textures are probably by Pavel_S, TODO  
