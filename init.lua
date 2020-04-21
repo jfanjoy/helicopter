@@ -232,12 +232,18 @@ minetest.register_entity("helicopter:heli", {
 	sound_handle = nil,
 	tilting = vector.new(),
     energy = 0.001,
+    owner = nil,
+    infotext = "A nice helicopter",
 
 	on_activate = function(self, staticdata, dtime_s)
         if staticdata ~= "" and staticdata ~= nil then
             local data = minetest.deserialize(staticdata) or {}
             self.energy = data.stored_energy
-            minetest.debug("loaded: ", self.energy)
+            self.owner = data.stored_owner
+            if self.owner ~= nil then
+                self.infotext = self.infotext .. " owned by " .. self.owner
+            end
+            --minetest.debug("loaded: ", self.energy)
         end
         local pos = self.object:get_pos()
 	    local pointer=minetest.add_entity(pos,'helicopter:pointer')
@@ -256,6 +262,7 @@ minetest.register_entity("helicopter:heli", {
     get_staticdata = function(self) -- unloaded/unloads ... is now saved
         return minetest.serialize({
             stored_energy = self.energy,
+            stored_owner = self.owner,
         })
     end,
 
@@ -302,6 +309,9 @@ minetest.register_entity("helicopter:heli", {
 			return
 		end
 		local name = puncher:get_player_name()
+        if self.owner == nil then
+            self.owner = name
+        end
         	
         if self.driver_name and self.driver_name ~= name then
 			-- do not allow other players to remove the object while there is a driver
@@ -315,7 +325,7 @@ minetest.register_entity("helicopter:heli", {
             load_fuel(self, puncher:get_player_name())
         end
 
-        if self.driver_name == nil then
+        if self.driver_name == nil and self.owner == name then
             --remove only when the pilot is not attached to the helicopter
 		    if self.sound_handle then
 			    minetest.sound_stop(self.sound_handle)
@@ -345,6 +355,9 @@ minetest.register_entity("helicopter:heli", {
 		end
 
 		local name = clicker:get_player_name()
+        if self.owner == nil then
+            self.owner = name
+        end
 
 		if name == self.driver_name then
 			-- driver clicked the object => driver gets off the vehicle
@@ -367,25 +380,29 @@ minetest.register_entity("helicopter:heli", {
             if is_under_water then
                 print("Under water, no way!")
             else
-			    -- no driver => clicker is new driver
-			    self.driver_name = name
-			    -- sound and animation
-			    self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
-					    {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
-			    self.object:set_animation_frame_speed(30)
-			    -- attach the driver
-			    clicker:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
-			    clicker:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
-			    player_api.player_attached[name] = true
-			    -- make the driver sit
-			    minetest.after(0.2, function()
-				    local player = minetest.get_player_by_name(name)
-				    if player then
-					    player_api.set_animation(player, "sit")
-				    end
-			    end)
-			    -- disable gravity
-			    self.object:set_acceleration(vector.new())
+                if self.owner == name then
+			        -- no driver => clicker is new driver
+			        self.driver_name = name
+			        -- sound and animation
+			        self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
+					        {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
+			        self.object:set_animation_frame_speed(30)
+			        -- attach the driver
+			        clicker:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
+			        clicker:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
+			        player_api.player_attached[name] = true
+			        -- make the driver sit
+			        minetest.after(0.2, function()
+				        local player = minetest.get_player_by_name(name)
+				        if player then
+					        player_api.set_animation(player, "sit")
+				        end
+			        end)
+			        -- disable gravity
+			        self.object:set_acceleration(vector.new())
+                else
+                    print("Hey, you are not the owner!")
+                end
             end
 		end
 	end,
@@ -442,7 +459,7 @@ if minetest.get_modpath("default") then
 	minetest.register_craft({
 		output = "helicopter:cabin",
 		recipe = {
-			{"basic_machines:battery", "default:diamondblock", ""},
+			{"default:copperblock ", "default:diamondblock", ""},
 			{"default:steelblock", "default:mese_block", "default:glass"},
 			{"default:steelblock", "xpanes:bar_flat", "xpanes:bar_flat"},
 		}
