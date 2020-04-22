@@ -232,7 +232,7 @@ minetest.register_entity("helicopter:heli", {
 	sound_handle = nil,
 	tilting = vector.new(),
     energy = 0.001,
-    owner = nil,
+    owner = "",
     infotext = "A nice helicopter",
 
 	on_activate = function(self, staticdata, dtime_s)
@@ -240,7 +240,7 @@ minetest.register_entity("helicopter:heli", {
             local data = minetest.deserialize(staticdata) or {}
             self.energy = data.stored_energy
             self.owner = data.stored_owner
-            if self.owner ~= nil then
+            if self.owner ~= "" then
                 self.infotext = self.infotext .. " owned by " .. self.owner
             end
             --minetest.debug("loaded: ", self.energy)
@@ -309,6 +309,7 @@ minetest.register_entity("helicopter:heli", {
 			return
 		end
 		local name = puncher:get_player_name()
+        if self.owner and self.owner ~= name and self.owner ~= "" then return end
         if self.owner == nil then
             self.owner = name
         end
@@ -355,7 +356,8 @@ minetest.register_entity("helicopter:heli", {
 		end
 
 		local name = clicker:get_player_name()
-        if self.owner == nil then
+        if self.owner and self.owner ~= name and self.owner ~= "" then return end
+        if self.owner == "" then
             self.owner = name
         end
 
@@ -377,33 +379,28 @@ minetest.register_entity("helicopter:heli", {
 
 		elseif not self.driver_name then
             local is_under_water = check_is_under_water(self.object)
-            if is_under_water then
-                print("Under water, no way!")
-            else
-                if self.owner == name then
-			        -- no driver => clicker is new driver
-			        self.driver_name = name
-			        -- sound and animation
-			        self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
-					        {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
-			        self.object:set_animation_frame_speed(30)
-			        -- attach the driver
-			        clicker:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
-			        clicker:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
-			        player_api.player_attached[name] = true
-			        -- make the driver sit
-			        minetest.after(0.2, function()
-				        local player = minetest.get_player_by_name(name)
-				        if player then
-					        player_api.set_animation(player, "sit")
-				        end
-			        end)
-			        -- disable gravity
-			        self.object:set_acceleration(vector.new())
-                else
-                    print("Hey, you are not the owner!")
-                end
-            end
+            if is_under_water then return end
+
+	        -- no driver => clicker is new driver
+	        self.driver_name = name
+	        -- sound and animation
+	        self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
+			        {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
+	        self.object:set_animation_frame_speed(30)
+	        -- attach the driver
+	        clicker:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
+	        clicker:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
+	        player_api.player_attached[name] = true
+	        -- make the driver sit
+	        minetest.after(0.2, function()
+		        local player = minetest.get_player_by_name(name)
+		        if player then
+			        player_api.set_animation(player, "sit")
+		        end
+	        end)
+	        -- disable gravity
+	        self.object:set_acceleration(vector.new())
+
 		end
 	end,
 })
