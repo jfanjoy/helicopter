@@ -237,6 +237,12 @@ minetest.register_entity("helicopter:heli", {
     infotext = "A nice helicopter",
 
     get_staticdata = function(self) -- unloaded/unloads ... is now saved
+        if self.driver_name == nil then 
+            if self.sound_handle ~= nil then
+		        minetest.sound_stop(self.sound_handle)
+		        self.sound_handle = nil
+            end
+        end
         return minetest.serialize({
             stored_energy = self.energy,
             stored_owner = self.owner,
