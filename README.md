@@ -19,6 +19,6 @@ helicopter_water_driblet.png by DS | License: CC0
 
 helicopter model and texture:  
 
-Helicube is a model made by Alexsandro Percy, based in original model aesthetic but made from zero. But using on rotors an adaptation of the texture from 3D model made by Melkor.  
+Helicube is a model made by Alexsandro Percy, based in original model aesthetic but made from zero. But using on rotors an adaptation of the texture from 3D model made by Melkor and his animations.  
 
-the item textures are probably by Pavel_S, TODO  
+the item textures are probably by Pavel_S  
