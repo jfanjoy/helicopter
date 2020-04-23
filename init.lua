@@ -3,7 +3,7 @@
 --
 
 local tilting_speed = 1
-local tilting_max = 0.4
+local tilting_max = 0.35
 local power_max = 15
 local power_min = 0.2 -- if negative, the helicopter can actively fly downwards
 local wanted_vert_speed = 10
@@ -63,12 +63,12 @@ local function load_fuel(self, player_name)
         local player = minetest.get_player_by_name(player_name)
         local inv = player:get_inventory()
         local fuel, inventory_fuel
-        inventory_fuel = "basic_machines:power_block"
+        inventory_fuel = "helicopter:biofuel"
         if inv:contains_item("main", inventory_fuel) then
-            local stack    = ItemStack("basic_machines:power_block 1")
+            local stack    = ItemStack(inventory_fuel .. " 1")
             local taken = inv:remove_item("main", stack)
 
-	        self.energy = 10
+	        self.energy = self.energy + 1
             local energy_indicator_angle = get_pointer_angle(self.energy)
             self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
 
@@ -184,7 +184,7 @@ local function heli_control(self, dtime, touching_ground, liquid_below, vel_befo
 
         -- if gaining altitude, it consumes more power
         local y_pos_reference = position.y - 100 --after altitude 100 the power need will increase
-        if y_pos_reference > 0 then altitude_consumption_variable = ((y_pos_reference/1000)^2) end
+        if y_pos_reference > 0 then altitude_consumption_variable = ((y_pos_reference/100)^2) end
 
         local consumed_power = (power/180) + altitude_consumption_variable
         self.energy = self.energy - consumed_power;
@@ -449,6 +449,11 @@ minetest.register_craftitem("helicopter:heli", {
 		return itemstack
 	end,
 })
+-- biofuel
+minetest.register_craftitem("helicopter:biofuel",{
+	description = "Bio Fuel",
+	inventory_image = "biofuel_inv.png",
+})
 
 --
 -- crafting
@@ -476,6 +481,13 @@ if minetest.get_modpath("default") then
 		recipe = {
 			{"",                  "helicopter:blades"},
 			{"helicopter:blades", "helicopter:cabin"},
+		}
+	})
+	minetest.register_craft({
+		output = "helicopter:biofuel",
+		recipe = {
+			{"",              "farming:wheat"},
+			{"farming:wheat", "farming:wheat"},
 		}
 	})
 end
