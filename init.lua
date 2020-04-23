@@ -4,7 +4,7 @@
 
 local tilting_speed = 1
 local tilting_max = 0.4
-local power_max = 20
+local power_max = 15
 local power_min = 0.2 -- if negative, the helicopter can actively fly downwards
 local wanted_vert_speed = 10
 local friction_air_quadratic = 0.01
