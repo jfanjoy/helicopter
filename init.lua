@@ -1,3 +1,5 @@
+dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "biofuel.lua")
+
 --
 -- constants
 --
@@ -449,11 +451,6 @@ minetest.register_craftitem("helicopter:heli", {
 		return itemstack
 	end,
 })
--- biofuel
-minetest.register_craftitem("helicopter:biofuel",{
-	description = "Bio Fuel",
-	inventory_image = "biofuel_inv.png",
-})
 
 --
 -- crafting
@@ -483,20 +480,11 @@ if minetest.get_modpath("default") then
 			{"helicopter:blades", "helicopter:cabin"},
 		}
 	})
-	minetest.register_craft({
-		output = "helicopter:biofuel",
-		recipe = {
-			{"",              "farming:wheat"},
-			{"farming:wheat", "farming:wheat"},
-		}
-	})
 end
-
 
 --
 -- fuel
 --
-
 minetest.register_entity('helicopter:pointer',{
 initial_properties = {
 	physical = false,
@@ -519,5 +507,4 @@ get_staticdata=function(self)
 end,
 	
 })
-
 
