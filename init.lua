@@ -254,9 +254,6 @@ minetest.register_entity("helicopter:heli", {
             local data = minetest.deserialize(staticdata) or {}
             self.energy = data.stored_energy
             self.owner = data.stored_owner
-            if self.owner ~= "" then
-                self.infotext = self.infotext .. " owned by " .. self.owner
-            end
             --minetest.debug("loaded: ", self.energy)
         end
 
@@ -439,7 +436,12 @@ minetest.register_craftitem("helicopter:heli", {
 		if minetest.get_node(pointed_thing.above).name ~= "air" then
 			return
 		end
-		minetest.add_entity(pointed_thing.above, "helicopter:heli")
+       
+        local obj = minetest.add_entity(pointed_thing.above, "helicopter:heli")
+        local ent = obj:get_luaentity()
+        local owner = placer:get_player_name()
+        ent.owner = owner
+
 		if not (creative_exists and placer and
 				creative.is_enabled_for(placer:get_player_name())) then
 			itemstack:take_item()
