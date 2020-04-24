@@ -1,5 +1,3 @@
-dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "biofuel.lua")
-
 --
 -- constants
 --
@@ -65,7 +63,7 @@ local function load_fuel(self, player_name)
         local player = minetest.get_player_by_name(player_name)
         local inv = player:get_inventory()
         local fuel, inventory_fuel
-        inventory_fuel = "helicopter:biofuel"
+        inventory_fuel = "biofuel:biofuel"
         if inv:contains_item("main", inventory_fuel) then
             local stack    = ItemStack(inventory_fuel .. " 1")
             local taken = inv:remove_item("main", stack)
