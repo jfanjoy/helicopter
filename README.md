@@ -10,8 +10,6 @@ original code by Pavel_S: GPL_v2 (see file LICENSE)
 changes / complete rework by DS and A_Percy
 `matrix.lua` file: CC0 
 
-Biofuel code comes adapted from Wine mod for Minetest by TenPlus1
-
 License of media (textures and sounds):
 ---------------------------------------
 
