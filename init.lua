@@ -213,6 +213,10 @@ local function heli_control(self, dtime, touching_ground, liquid_below, vel_befo
 	return vector.add(vel_before, added_vel)
 end
 
+local function get_hipotenuse_value(point1, point2)
+    return math.sqrt((point1.x - point2.x) ^ 2 + (point1.y - point2.y) ^ 2 + (point1.z - point2.z) ^ 2)
+end
+
 --
 -- entity
 --
@@ -235,6 +239,8 @@ minetest.register_entity("helicopter:heli", {
     owner = "",
     static_save = true,
     infotext = "A nice helicopter",
+    last_vel = vector.new(),
+    damage = 0,
 
     get_staticdata = function(self) -- unloaded/unloads ... is now saved
         if self.driver_name == nil then 
@@ -306,6 +312,34 @@ minetest.register_entity("helicopter:heli", {
 			return a * s
 		end)
 
+        --[[
+            collision detection
+            using velocity vector as virtually a point on space, we compare
+            if last velocity has a great distance difference (virtually 5) from current velocity
+            using some trigonometry (get_hipotenuse_value). If yes, we have an abrupt collision
+        ]]--
+        if self.driver_name then
+            local impact = get_hipotenuse_value(vel, self.last_vel)
+            if impact > 5 then
+                --self.damage = self.damage + impact --sum the impact value directly to damage meter
+                local curr_pos = self.object:get_pos()
+                minetest.sound_play("collision", {
+                    to_player = self.driver_name,
+	                --pos = curr_pos,
+	                --max_hear_distance = 5,
+	                gain = 1.0,
+                    fade = 0.0,
+                    pitch = 1.0,
+                })
+                --[[if self.damage > 100 then --if acumulated damage is greater than 100, adieu
+                    if self.pointer then self.pointer:remove() end
+		            self.object:remove()    
+                end]]--
+            end
+        end
+        self.last_vel = vel --saves velocity for collision comparation
+        -- end collision detection
+
 		self.object:set_velocity(vel)
 	end,
 
@@ -351,6 +385,16 @@ minetest.register_entity("helicopter:heli", {
 		    self.object:remove()
 
 		    minetest.handle_node_drops(self.object:get_pos(), {"helicopter:heli"}, puncher)
+            --[[local inv = puncher:get_inventory()
+            if inv then
+	            for _, item in ipairs({"helicopter:heli"}) do
+                    local itemstack = inv:add_item("main", item)
+                    local imeta = itemstack:get_meta()
+                    imeta:set_int("damage", self.damage)
+                    imeta:set_int("energy", self.energy)
+	            end
+            end]]--
+
         end
         
 	end,
@@ -438,9 +482,12 @@ minetest.register_craftitem("helicopter:heli", {
 		end
        
         local obj = minetest.add_entity(pointed_thing.above, "helicopter:heli")
-        local ent = obj:get_luaentity()
+        --[[local ent = obj:get_luaentity()
+        local imeta = itemstack:get_meta()
         local owner = placer:get_player_name()
         ent.owner = owner
+        ent.energy = imeta:get_int("energy")
+        ent.damage = imeta:get_int("damage")]]--
 
 		if not (creative_exists and placer and
 				creative.is_enabled_for(placer:get_player_name())) then
