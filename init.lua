@@ -67,6 +67,10 @@ minetest.register_entity("helicopter:heli", {
             if self.sound_handle ~= nil then
 		        minetest.sound_stop(self.sound_handle)
 		        self.sound_handle = nil
+
+                --why its here? cause if the sound is attached, player must so
+                local player = minetest.get_player_by_name(self.owner)
+                remove_heli_hud(player)
             end
         end
         return minetest.serialize({
