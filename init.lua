@@ -14,6 +14,9 @@ dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_hud.lua")
 dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_control.lua")
 dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "fuel_management.lua")
 
+
+last_time = minetest.get_us_time()
+
 --
 -- helpers and co.
 --
@@ -73,6 +76,7 @@ minetest.register_entity("helicopter:heli", {
                 remove_heli_hud(player)
             end
         end
+
         return minetest.serialize({
             stored_energy = self.energy,
             stored_owner = self.owner,
@@ -159,6 +163,13 @@ minetest.register_entity("helicopter:heli", {
                     if self.pointer then self.pointer:remove() end
 		            self.object:remove()    
                 end]]--
+            end
+
+            --update hud
+            local player = minetest.get_player_by_name(self.driver_name)
+            if ((minetest.get_us_time() - last_time) / 1000) > 200 then
+                last_time = minetest.get_us_time()
+                update_heli_hud(player)
             end
         end
         self.last_vel = vel --saves velocity for collision comparation
@@ -272,11 +283,11 @@ minetest.register_entity("helicopter:heli", {
 		        local player = minetest.get_player_by_name(name)
 		        if player then
 			        player_api.set_animation(player, "sit")
+                    update_heli_hud(player)
 		        end
 	        end)
 	        -- disable gravity
 	        self.object:set_acceleration(vector.new())
-
 		end
 	end,
 })

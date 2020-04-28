@@ -14,8 +14,6 @@ function vector_length_sq(v)
 	return v.x * v.x + v.y * v.y + v.z * v.z
 end
 
-last_time = minetest.get_us_time()
-
 function get_pointer_angle(energy)
     local angle = energy * 18
     angle = angle - 90
@@ -52,14 +50,7 @@ function heli_control(self, dtime, touching_ground, liquid_below, vel_before)
 		self.object:set_acceleration(vector.multiply(vector_up, -gravity))
 		return
 	end
-
     
-    --update hud
-    if ((minetest.get_us_time() - last_time) / 1000) > 200 then
-        last_time = minetest.get_us_time()
-        update_heli_hud(driver)
-    end
-
 	local ctrl = driver:get_player_control()
 	local rot = self.object:get_rotation()
 
