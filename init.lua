@@ -9,6 +9,24 @@ local friction_land_constant = 2
 local friction_water_quadratic = 0.1
 local friction_water_constant = 1
 
+local colors ={
+    black='#4C4C4C',
+    blue='#99CEFF',
+    brown='#D5B695',
+    cyan='#B2FFFF',
+    dark_green='#7FB263',
+    dark_grey='#999999',
+    green='#B3FFB2',
+    grey='#CCCCCC',
+    magenta='#FFB2E0',
+    orange='#FFDD99',
+    pink='#FFD8D8',
+    red='#FFB2B2',
+    violet='#DCB2FF',
+    white='#FFFFFF',
+    yellow='#FFFF80',
+}
+
 --dofile(minetest.get_modpath(minetest.get_current_modname()) .. DIR_DELIM .. "heli_hud.lua")
 dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_hud.lua")
 dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_control.lua")
@@ -16,6 +34,7 @@ dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "fuel_management.lua")
 
 
 last_time = minetest.get_us_time()
+local random = math.random
 
 --
 -- helpers and co.
@@ -40,6 +59,53 @@ local function get_hipotenuse_value(point1, point2)
     return math.sqrt((point1.x - point2.x) ^ 2 + (point1.y - point2.y) ^ 2 + (point1.z - point2.z) ^ 2)
 end
 
+
+-- destroy the helicopter
+local function destroy(self)
+    if self.sound_handle then
+        minetest.sound_stop(self.sound_handle)
+        self.sound_handle = nil
+    end
+
+    if self.driver_name then
+        -- detach the driver first (puncher must be driver)
+        puncher:set_detach()
+        puncher:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
+        player_api.player_attached[name] = nil
+        -- player should stand again
+        player_api.set_animation(puncher, "stand")
+        self.driver_name = nil
+    end
+
+    local pos = self.object:get_pos()
+    if self.pointer then self.pointer:remove() end
+
+    self.object:remove()
+
+    pos.y=pos.y+2
+    for i=1,8 do
+	    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:steel_ingot')
+    end
+
+    for i=1,7 do
+	    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:diamond')
+    end
+
+    for i=1,7 do
+	    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:mese_crystal')
+    end
+
+    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:steelblock')
+    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:copperblock')
+    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'helicopter:blades')
+
+    local total_biofuel = math.floor(self.energy) - 1
+    for i=0,total_biofuel do
+        minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'biofuel:biofuel')
+    end
+end
+
+
 --
 -- entity
 --
@@ -63,7 +129,7 @@ minetest.register_entity("helicopter:heli", {
     static_save = true,
     infotext = "A nice helicopter",
     last_vel = vector.new(),
-    damage = 0,
+    hp = 50,
 
     get_staticdata = function(self) -- unloaded/unloads ... is now saved
         if self.driver_name == nil then 
@@ -80,6 +146,7 @@ minetest.register_entity("helicopter:heli", {
         return minetest.serialize({
             stored_energy = self.energy,
             stored_owner = self.owner,
+            stored_hp = self.hp,
         })
     end,
 
@@ -88,6 +155,7 @@ minetest.register_entity("helicopter:heli", {
             local data = minetest.deserialize(staticdata) or {}
             self.energy = data.stored_energy
             self.owner = data.stored_owner
+            self.hp = data.stored_hp
             --minetest.debug("loaded: ", self.energy)
         end
 
@@ -160,8 +228,7 @@ minetest.register_entity("helicopter:heli", {
                     pitch = 1.0,
                 })
                 --[[if self.damage > 100 then --if acumulated damage is greater than 100, adieu
-                    if self.pointer then self.pointer:remove() end
-		            self.object:remove()    
+                    destroy(self)   
                 end]]--
             end
 
@@ -178,7 +245,7 @@ minetest.register_entity("helicopter:heli", {
 		self.object:set_velocity(vel)
 	end,
 
-	on_punch = function(self, puncher)
+	on_punch = function(self, puncher, ttime, toolcaps, dir, damage)
 		if not puncher or not puncher:is_player() then
 			return
 		end
@@ -201,7 +268,37 @@ minetest.register_entity("helicopter:heli", {
         end
 
         if self.driver_name == nil and self.owner == name then
-            --remove only when the pilot is not attached to the helicopter
+
+            -- deal with painting or destroying
+		    local itmstck=puncher:get_wielded_item()
+		    if itmstck then
+			    local name=itmstck:get_name()
+			    local _,indx = name:find('dye:')
+			    if indx then
+				    local color = name:sub(indx+1)
+				    local colstr = colors[color]
+                    --[[TODO]]--
+			    else -- deal damage
+				    if not self.driver and toolcaps and toolcaps.damage_groups and toolcaps.damage_groups.fleshy then
+					    --mobkit.hurt(self,toolcaps.damage_groups.fleshy - 1)
+					    --mobkit.make_sound(self,'hit')
+                        self.hp = self.hp - 10
+                        minetest.sound_play("collision", {
+	                        object = self.object,
+	                        max_hear_distance = 5,
+	                        gain = 1.0,
+                            fade = 0.0,
+                            pitch = 1.0,
+                        })
+				    end
+			    end
+            end
+
+            if self.hp <= 0 then
+                destroy(self)
+            end
+
+            --[[remove only when the pilot is not attached to the helicopter
 		    if self.sound_handle then
 			    minetest.sound_stop(self.sound_handle)
 			    self.sound_handle = nil
@@ -219,7 +316,7 @@ minetest.register_entity("helicopter:heli", {
             if self.pointer then self.pointer:remove() end
 		    self.object:remove()
 
-		    minetest.handle_node_drops(self.object:get_pos(), {"helicopter:heli"}, puncher)
+		    minetest.handle_node_drops(self.object:get_pos(), {"helicopter:heli"}, puncher)]]--
             --[[local inv = puncher:get_inventory()
             if inv then
 	            for _, item in ipairs({"helicopter:heli"}) do
@@ -270,6 +367,11 @@ minetest.register_entity("helicopter:heli", {
 
 	        -- no driver => clicker is new driver
 	        self.driver_name = name
+
+            -- temporary------
+            self.hp = 50 -- why? cause I can desist from destroy
+            ------------------
+
 	        -- sound and animation
 	        self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
 			        {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
@@ -320,12 +422,13 @@ minetest.register_craftitem("helicopter:heli", {
 		end
        
         local obj = minetest.add_entity(pointed_thing.above, "helicopter:heli")
-        --[[local ent = obj:get_luaentity()
-        local imeta = itemstack:get_meta()
+        local ent = obj:get_luaentity()
+        --local imeta = itemstack:get_meta()
         local owner = placer:get_player_name()
         ent.owner = owner
+        --[[
         ent.energy = imeta:get_int("energy")
-        ent.damage = imeta:get_int("damage")]]--
+        ent.hp = imeta:get_int("hp")]]--
 
 		if not (creative_exists and placer and
 				creative.is_enabled_for(placer:get_player_name())) then
