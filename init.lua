@@ -256,7 +256,7 @@ minetest.register_entity("helicopter:heli", {
 
             --update hud
             local player = minetest.get_player_by_name(self.driver_name)
-            if ((minetest.get_us_time() - last_time) / 1000) > 200 then
+            if ((minetest.get_us_time() - last_time) / 1000) > 1000 then
                 last_time = minetest.get_us_time()
                 update_heli_hud(player)
             end
