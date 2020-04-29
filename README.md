@@ -1,5 +1,15 @@
-Minetest 5.1 mod: Not So Simple helicopter
+Minetest 5.2 mod: Not So Simple Hhelicopter
 ========================================
+
+This is the "Not So Simple Helicopter", fork of the old "Simple Helicopter".
+This version is more expensive to produce and that uses biofuel from crops. So far we have a helicopter that consumes fuel, has its consumption changed according to the level of flight. It dependes on a second mod (based on the wine mod), with a distiller that allows to transform some inputs into biofuel and fly with them.
+
+It can be painted using dye of any color you want, you must punch the seat with the dye.
+
+
+Biofuel mod can be found here: https://github.com/APercy/minetest_biofuel
+
+-----------------------
 originally Simple helicopter by Pavel_S 
 reworked by DS 
 re-reworked by A_Percy
