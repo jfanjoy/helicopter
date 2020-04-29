@@ -10,21 +10,21 @@ local friction_water_quadratic = 0.1
 local friction_water_constant = 1
 
 local colors ={
-    black='#4C4C4C',
-    blue='#99CEFF',
-    brown='#D5B695',
-    cyan='#B2FFFF',
-    dark_green='#7FB263',
-    dark_grey='#999999',
-    green='#B3FFB2',
-    grey='#CCCCCC',
-    magenta='#FFB2E0',
-    orange='#FFDD99',
-    pink='#FFD8D8',
-    red='#FFB2B2',
-    violet='#DCB2FF',
+    black='#2b2b2b',
+    blue='#0063b0',
+    brown='#8c5922',
+    cyan='#80b6b6',
+    dark_green='#567a42',
+    dark_grey='#6d6d6d',
+    green='#4ee34c',
+    grey='#9f9f9f',
+    magenta='#ff0098',
+    orange='#ff8b0e',
+    pink='#ff62c6',
+    red='#dc1818',
+    violet='#a437ff',
     white='#FFFFFF',
-    yellow='#FFFF80',
+    yellow='#ffe400',
 }
 
 --dofile(minetest.get_modpath(minetest.get_current_modname()) .. DIR_DELIM .. "heli_hud.lua")
@@ -59,6 +59,24 @@ local function get_hipotenuse_value(point1, point2)
     return math.sqrt((point1.x - point2.x) ^ 2 + (point1.y - point2.y) ^ 2 + (point1.z - point2.z) ^ 2)
 end
 
+--painting
+local function paint(self, colstr)
+    if colstr then
+        self.color = colstr
+        local l_textures = self.initial_properties.textures
+        for _, texture in ipairs(l_textures) do
+            local i,indx = texture:find('painting.png')
+            if indx then
+                l_textures[_] = "painting.png^[multiply:".. colstr
+            end
+            local i,indx = texture:find('colective.png')
+            if indx then
+                l_textures[_] = "colective.png^[multiply:".. colstr
+            end
+        end
+	    self.object:set_properties({textures=l_textures})
+    end
+end
 
 -- destroy the helicopter
 local function destroy(self)
@@ -130,6 +148,7 @@ minetest.register_entity("helicopter:heli", {
     infotext = "A nice helicopter",
     last_vel = vector.new(),
     hp = 50,
+    color = "#0063b0",
 
     get_staticdata = function(self) -- unloaded/unloads ... is now saved
         if self.driver_name == nil then 
@@ -147,6 +166,7 @@ minetest.register_entity("helicopter:heli", {
             stored_energy = self.energy,
             stored_owner = self.owner,
             stored_hp = self.hp,
+            stored_color = self.color,
         })
     end,
 
@@ -156,9 +176,11 @@ minetest.register_entity("helicopter:heli", {
             self.energy = data.stored_energy
             self.owner = data.stored_owner
             self.hp = data.stored_hp
+            self.color = data.stored_color
             --minetest.debug("loaded: ", self.energy)
         end
 
+        paint(self, self.color)
         local pos = self.object:get_pos()
 	    local pointer=minetest.add_entity(pos,'helicopter:pointer')
         local energy_indicator_angle = get_pointer_angle(self.energy)
@@ -275,9 +297,18 @@ minetest.register_entity("helicopter:heli", {
 			    local name=itmstck:get_name()
 			    local _,indx = name:find('dye:')
 			    if indx then
+
+                    --lets paint!!!!
 				    local color = name:sub(indx+1)
 				    local colstr = colors[color]
-                    --[[TODO]]--
+                    --minetest.chat_send_all(color ..' '.. dump(colstr))
+				    if colstr then
+                        paint(self, colstr)
+					    itmstck:set_count(itmstck:get_count()-1)
+					    puncher:set_wielded_item(itmstck)
+				    end
+                    -- end painting
+
 			    else -- deal damage
 				    if not self.driver and toolcaps and toolcaps.damage_groups and toolcaps.damage_groups.fleshy then
 					    --mobkit.hurt(self,toolcaps.damage_groups.fleshy - 1)
