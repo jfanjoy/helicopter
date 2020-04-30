@@ -292,7 +292,7 @@ minetest.register_entity("helicopter:heli", {
             load_fuel(self, puncher:get_player_name())
         end
 
-        if is_attached == false and self.owner == name then
+        if is_attached == false then
 
             -- deal with painting or destroying
 		    local itmstck=puncher:get_wielded_item()
