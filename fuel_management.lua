@@ -28,13 +28,15 @@ function load_fuel(self, player_name)
     if self.energy < 9.5 then 
         local player = minetest.get_player_by_name(player_name)
         local inv = player:get_inventory()
-        local fuel, inventory_fuel
-        inventory_fuel = "biofuel:biofuel"
+        local inventory_fuel = "biofuel:biofuel"
+
         if inv:contains_item("main", inventory_fuel) then
-            local stack    = ItemStack(inventory_fuel .. " 1")
+            local stack = ItemStack(inventory_fuel .. " 1")
             local taken = inv:remove_item("main", stack)
 
 	        self.energy = self.energy + 1
+            if self.energy > 10 then self.energy = 10 end
+
             local energy_indicator_angle = get_pointer_angle(self.energy)
             self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
 

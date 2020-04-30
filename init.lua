@@ -284,12 +284,15 @@ minetest.register_entity("helicopter:heli", {
 
         local touching_ground, liquid_below = check_node_below(self.object)
         
-        if self.driver_name and self.driver_name == name and touching_ground then
+        local is_attached = false
+        if puncher:get_attach() == self.object then is_attached = true end
+
+        if is_attached == true and touching_ground then
             --refuel
             load_fuel(self, puncher:get_player_name())
         end
 
-        if self.driver_name == nil and self.owner == name then
+        if is_attached == false and self.owner == name then
 
             -- deal with painting or destroying
 		    local itmstck=puncher:get_wielded_item()
@@ -407,6 +410,7 @@ minetest.register_entity("helicopter:heli", {
 	        self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
 			        {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
 	        self.object:set_animation_frame_speed(30)
+
 	        -- attach the driver
 	        clicker:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
 	        clicker:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
