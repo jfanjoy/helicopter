@@ -287,7 +287,11 @@ minetest.register_entity("helicopter:heli", {
         local is_attached = false
         if puncher:get_attach() == self.object then is_attached = true end
 
-        if is_attached == true and touching_ground then
+        local itmstck=puncher:get_wielded_item()
+        local item_name = ""
+        if itmstck then item_name = itmstck:get_name() end
+
+        if is_attached == true and touching_ground and item_name == "biofuel:biofuel" then
             --refuel
             load_fuel(self, puncher:get_player_name())
         end
@@ -295,14 +299,12 @@ minetest.register_entity("helicopter:heli", {
         if is_attached == false then
 
             -- deal with painting or destroying
-		    local itmstck=puncher:get_wielded_item()
 		    if itmstck then
-			    local name=itmstck:get_name()
-			    local _,indx = name:find('dye:')
+			    local _,indx = item_name:find('dye:')
 			    if indx then
 
                     --lets paint!!!!
-				    local color = name:sub(indx+1)
+				    local color = item_name:sub(indx+1)
 				    local colstr = colors[color]
                     --minetest.chat_send_all(color ..' '.. dump(colstr))
 				    if colstr then
