@@ -119,8 +119,6 @@ function heli_control(self, dtime, touching_ground, liquid_below, vel_before)
 	-- calculate how strong the heli should accelerate towards rotated up
 	local power = vert_vel_goal - vel_before.y + gravity * dtime
 	power = math.min(math.max(power, power_min * dtime), power_max * dtime)
-    local touching_ground, liquid_below = check_node_below(self.object)
-
 
     -- calculate energy consumption --
     ----------------------------------
