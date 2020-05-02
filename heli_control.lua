@@ -134,7 +134,13 @@ function heli_control(self, dtime, touching_ground, liquid_below, vel_before)
         self.energy = self.energy - consumed_power;
 
         local energy_indicator_angle = get_pointer_angle(self.energy)
-        self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
+        if self.pointer:get_luaentity() then
+            self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
+        else
+            --in case it have lost the entity by some conflict
+            self.pointer=minetest.add_entity({x=0,y=11.26,z=9.37},'helicopter:pointer')
+            self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
+        end
     end
     if self.energy <= 0 then
         power = 0.2
