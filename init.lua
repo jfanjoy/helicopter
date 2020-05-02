@@ -151,17 +151,6 @@ minetest.register_entity("helicopter:heli", {
     color = "#0063b0",
 
     get_staticdata = function(self) -- unloaded/unloads ... is now saved
-        if self.driver_name == nil then 
-            if self.sound_handle ~= nil then
-		        minetest.sound_stop(self.sound_handle)
-		        self.sound_handle = nil
-
-                --why its here? cause if the sound is attached, player must so
-                local player = minetest.get_player_by_name(self.owner)
-                if player then remove_heli_hud(player) end
-            end
-        end
-
         return minetest.serialize({
             stored_energy = self.energy,
             stored_owner = self.owner,
@@ -236,7 +225,20 @@ minetest.register_entity("helicopter:heli", {
             if last velocity has a great distance difference (virtually 5) from current velocity
             using some trigonometry (get_hipotenuse_value). If yes, we have an abrupt collision
         ]]--
-        if self.driver_name then
+
+        local is_attached = false
+        if self.owner then
+            local player = minetest.get_player_by_name(self.owner)
+            
+            if player then
+                local player_attach = player:get_attach()
+                if player_attach then
+                    if player_attach == self.object then is_attached = true end
+                end
+            end
+        end
+
+        if is_attached then
             local impact = get_hipotenuse_value(vel, self.last_vel)
             if impact > 5 then
                 --self.damage = self.damage + impact --sum the impact value directly to damage meter
@@ -259,6 +261,15 @@ minetest.register_entity("helicopter:heli", {
             if ((minetest.get_us_time() - last_time) / 1000) > 1000 then
                 last_time = minetest.get_us_time()
                 update_heli_hud(player)
+            end
+        else
+            if self.sound_handle ~= nil then
+	            minetest.sound_stop(self.sound_handle)
+	            self.sound_handle = nil
+
+                --why its here? cause if the sound is attached, player must so
+                local player_owner = minetest.get_player_by_name(self.owner)
+                if player_owner then remove_heli_hud(player_owner) end
             end
         end
         self.last_vel = vel --saves velocity for collision comparation
