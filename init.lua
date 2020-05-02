@@ -158,7 +158,7 @@ minetest.register_entity("helicopter:heli", {
 
                 --why its here? cause if the sound is attached, player must so
                 local player = minetest.get_player_by_name(self.owner)
-                remove_heli_hud(player)
+                if player then remove_heli_hud(player) end
             end
         end
 
@@ -395,7 +395,7 @@ minetest.register_entity("helicopter:heli", {
 			self.object:set_acceleration(vector.multiply(vector_up, -gravity))
 
             --remove hud
-            remove_heli_hud(clicker)
+            if clicker then remove_heli_hud(clicker) end
         
 		elseif not self.driver_name then
             local is_under_water = check_is_under_water(self.object)

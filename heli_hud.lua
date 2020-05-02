@@ -1,6 +1,7 @@
 local heli_hud_list = {}
 
 function update_heli_hud(player)
+    --[[
     local player_name = player:get_player_name()
 
 	hour = minetest.env:get_timeofday() * 24
@@ -62,11 +63,12 @@ function update_heli_hud(player)
 
         heli_hud_list[player_name] = ids
     end
-
+    ]]--
 end
 
 
 function remove_heli_hud(player)
+    --[[
     local player_name = player:get_player_name()
     local ids = heli_hud_list[player_name]
     player:hud_remove(ids["altitude"])
@@ -74,4 +76,5 @@ function remove_heli_hud(player)
     player:hud_remove(ids["title"])
     player:hud_remove(ids["bg"])
     heli_hud_list[player_name] = nil
+    ]]--
 end
