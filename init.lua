@@ -30,7 +30,7 @@ local colors ={
 --dofile(minetest.get_modpath(minetest.get_current_modname()) .. DIR_DELIM .. "heli_hud.lua")
 dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_hud.lua")
 dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_control.lua")
-dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "fuel_management.lua")
+dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_fuel_management.lua")
 
 
 last_time = minetest.get_us_time()
@@ -65,13 +65,13 @@ local function paint(self, colstr)
         self.color = colstr
         local l_textures = self.initial_properties.textures
         for _, texture in ipairs(l_textures) do
-            local i,indx = texture:find('painting.png')
+            local i,indx = texture:find('helicopter_painting.png')
             if indx then
-                l_textures[_] = "painting.png^[multiply:".. colstr
+                l_textures[_] = "helicopter_painting.png^[multiply:".. colstr
             end
-            local i,indx = texture:find('colective.png')
+            local i,indx = texture:find('helicopter_colective.png')
             if indx then
-                l_textures[_] = "colective.png^[multiply:".. colstr
+                l_textures[_] = "helicopter_colective.png^[multiply:".. colstr
             end
         end
 	    self.object:set_properties({textures=l_textures})
@@ -136,7 +136,7 @@ minetest.register_entity("helicopter:heli", {
 		selectionbox = {-1,0,-1, 1,0.3,1},
 		visual = "mesh",
 		mesh = "helicopter_heli.b3d",
-        textures = {"interior_black.png", "metal.png", "strips.png", "painting.png", "black.png", "aluminum.png", "heli_glass.png", "heli_glass.png", "interior.png", "panel.png", "colective.png", "painting.png", "rotors.png", "interior_black.png",},
+        textures = {"helicopter_interior_black.png", "helicopter_metal.png", "helicopter_strips.png", "helicopter_painting.png", "helicopter_black.png", "helicopter_aluminum.png", "helicopter_glass.png", "helicopter_glass.png", "helicopter_interior.png", "helicopter_panel.png", "helicopter_colective.png", "helicopter_painting.png", "helicopter_rotors.png", "helicopter_interior_black.png",},
 	},
 
 	driver_name = nil,
