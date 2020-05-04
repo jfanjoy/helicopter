@@ -33,7 +33,7 @@ dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_control.lua")
 dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_fuel_management.lua")
 
 
-last_time = minetest.get_us_time()
+helicopter_last_time_command = 0
 local random = math.random
 
 --
@@ -185,6 +185,8 @@ minetest.register_entity("helicopter:heli", {
 	end,
 
 	on_step = function(self, dtime)
+        helicopter_last_time_command = helicopter_last_time_command + dtime
+        if helicopter_last_time_command > 1 then helicopter_last_time_command = 1 end
 		local touching_ground, liquid_below
 
 		local vel = self.object:get_velocity()
@@ -258,8 +260,8 @@ minetest.register_entity("helicopter:heli", {
 
             --update hud
             local player = minetest.get_player_by_name(self.driver_name)
-            if ((minetest.get_us_time() - last_time) / 1000) > 1000 then
-                last_time = minetest.get_us_time()
+            if helicopter_last_time_command > 0.3 then
+                helicopter_last_time_command = 0
                 update_heli_hud(player)
             end
         else
