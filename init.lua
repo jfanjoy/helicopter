@@ -183,7 +183,7 @@ minetest.register_entity("helicopter:heli", {
 		self.object:set_armor_groups({immortal=1})
 
         local vector_up = vector.new(0, 1, 0)
-		self.object:set_acceleration(vector.multiply(vector_up, -gravity))
+		self.object:set_acceleration(vector.multiply(vector_up, -helicopter.gravity))
 	end,
 
 	on_step = function(self, dtime)
@@ -407,7 +407,7 @@ minetest.register_entity("helicopter:heli", {
 			-- player should stand again
 			player_api.set_animation(clicker, "stand")
 			-- gravity
-			self.object:set_acceleration(vector.multiply(vector_up, -gravity))
+			self.object:set_acceleration(vector.multiply(vector_up, -helicopter.gravity))
 
             --remove hud
             if clicker then remove_heli_hud(clicker) end
