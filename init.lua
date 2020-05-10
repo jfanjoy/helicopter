@@ -2,14 +2,16 @@
 -- constants
 --
 
-local friction_air_quadratic = 0.01
-local friction_air_constant = 0.2
-local friction_land_quadratic = 1
-local friction_land_constant = 2
-local friction_water_quadratic = 0.1
-local friction_water_constant = 1
+helicopter = {}
 
-local colors ={
+helicopter.friction_air_quadratic = 0.01
+helicopter.friction_air_constant = 0.2
+helicopter.friction_land_quadratic = 1
+helicopter.friction_land_constant = 2
+helicopter.friction_water_quadratic = 0.1
+helicopter.friction_water_constant = 1
+
+helicopter.colors ={
     black='#2b2b2b',
     blue='#0063b0',
     brown='#8c5922',
@@ -33,8 +35,7 @@ dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_control.lua")
 dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_fuel_management.lua")
 
 
-helicopter_last_time_command = 0
-local random = math.random
+helicopter.helicopter_last_time_command = 0
 
 --
 -- helpers and co.
@@ -46,7 +47,7 @@ end
 
 local creative_exists = minetest.global_exists("creative")
 
-local function check_is_under_water(obj)
+function helicopter.check_is_under_water(obj)
 	local pos_up = obj:get_pos()
 	pos_up.y = pos_up.y + 0.1
 	local node_up = minetest.get_node(pos_up).name
@@ -55,12 +56,12 @@ local function check_is_under_water(obj)
 	return liquid_up
 end
 
-local function get_hipotenuse_value(point1, point2)
+function helicopter.get_hipotenuse_value(point1, point2)
     return math.sqrt((point1.x - point2.x) ^ 2 + (point1.y - point2.y) ^ 2 + (point1.z - point2.z) ^ 2)
 end
 
 --painting
-local function paint(self, colstr)
+function helicopter.paint(self, colstr)
     if colstr then
         self.color = colstr
         local l_textures = self.initial_properties.textures
@@ -79,7 +80,7 @@ local function paint(self, colstr)
 end
 
 -- destroy the helicopter
-local function destroy(self)
+function helicopter.destroy(self)
     if self.sound_handle then
         minetest.sound_stop(self.sound_handle)
         self.sound_handle = nil
@@ -102,24 +103,24 @@ local function destroy(self)
 
     pos.y=pos.y+2
     for i=1,8 do
-	    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:steel_ingot')
+	    minetest.add_item({x=pos.x+math.random()-0.5,y=pos.y,z=pos.z+math.random()-0.5},'default:steel_ingot')
     end
 
     for i=1,7 do
-	    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:diamond')
+	    minetest.add_item({x=pos.x+math.random()-0.5,y=pos.y,z=pos.z+math.random()-0.5},'default:diamond')
     end
 
     for i=1,7 do
-	    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:mese_crystal')
+	    minetest.add_item({x=pos.x+math.random()-0.5,y=pos.y,z=pos.z+math.random()-0.5},'default:mese_crystal')
     end
 
-    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:steelblock')
-    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'default:copperblock')
-    minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'helicopter:blades')
+    minetest.add_item({x=pos.x+math.random()-0.5,y=pos.y,z=pos.z+math.random()-0.5},'default:steelblock')
+    minetest.add_item({x=pos.x+math.random()-0.5,y=pos.y,z=pos.z+math.random()-0.5},'default:copperblock')
+    minetest.add_item({x=pos.x+math.random()-0.5,y=pos.y,z=pos.z+math.random()-0.5},'helicopter:blades')
 
     local total_biofuel = math.floor(self.energy) - 1
     for i=0,total_biofuel do
-        minetest.add_item({x=pos.x+random()-0.5,y=pos.y,z=pos.z+random()-0.5},'biofuel:biofuel')
+        minetest.add_item({x=pos.x+math.random()-0.5,y=pos.y,z=pos.z+math.random()-0.5},'biofuel:biofuel')
     end
 end
 
@@ -169,7 +170,7 @@ minetest.register_entity("helicopter:heli", {
             --minetest.debug("loaded: ", self.energy)
         end
 
-        paint(self, self.color)
+        helicopter.paint(self, self.color)
         local pos = self.object:get_pos()
 	    local pointer=minetest.add_entity(pos,'helicopter:pointer')
         local energy_indicator_angle = get_pointer_angle(self.energy)
@@ -181,19 +182,20 @@ minetest.register_entity("helicopter:heli", {
 
 		self.object:set_armor_groups({immortal=1})
 
+        local vector_up = vector.new(0, 1, 0)
 		self.object:set_acceleration(vector.multiply(vector_up, -gravity))
 	end,
 
 	on_step = function(self, dtime)
-        helicopter_last_time_command = helicopter_last_time_command + dtime
-        if helicopter_last_time_command > 1 then helicopter_last_time_command = 1 end
+        helicopter.helicopter_last_time_command = helicopter.helicopter_last_time_command + dtime
+        if helicopter.helicopter_last_time_command > 1 then helicopter.helicopter_last_time_command = 1 end
 		local touching_ground, liquid_below
 
 		local vel = self.object:get_velocity()
 
 		if self.driver_name then
 			touching_ground, liquid_below = check_node_below(self.object)
-			vel = heli_control(self, dtime, touching_ground, liquid_below, vel) or vel
+			vel = helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel) or vel
 		end
 
 		if vel.x == 0 and vel.y == 0 and vel.z == 0 then
@@ -208,11 +210,11 @@ minetest.register_entity("helicopter:heli", {
 		local speedsq = vector_length_sq(vel)
 		local fq, fc
 		if touching_ground then
-			fq, fc = friction_land_quadratic, friction_land_constant
+			fq, fc = helicopter.friction_land_quadratic, helicopter.friction_land_constant
 		elseif liquid_below then
-			fq, fc = friction_water_quadratic, friction_water_constant
+			fq, fc = helicopter.friction_water_quadratic, helicopter.friction_water_constant
 		else
-			fq, fc = friction_air_quadratic, friction_air_constant
+			fq, fc = helicopter.friction_air_quadratic, helicopter.friction_air_constant
 		end
 		vel = vector.apply(vel, function(a)
 			local s = math.sign(a)
@@ -241,7 +243,7 @@ minetest.register_entity("helicopter:heli", {
         end
 
         if is_attached then
-            local impact = get_hipotenuse_value(vel, self.last_vel)
+            local impact = helicopter.get_hipotenuse_value(vel, self.last_vel)
             if impact > 5 then
                 --self.damage = self.damage + impact --sum the impact value directly to damage meter
                 local curr_pos = self.object:get_pos()
@@ -254,14 +256,14 @@ minetest.register_entity("helicopter:heli", {
                     pitch = 1.0,
                 })
                 --[[if self.damage > 100 then --if acumulated damage is greater than 100, adieu
-                    destroy(self)   
+                    helicopter.destroy(self)   
                 end]]--
             end
 
             --update hud
             local player = minetest.get_player_by_name(self.driver_name)
-            if helicopter_last_time_command > 0.3 then
-                helicopter_last_time_command = 0
+            if helicopter.helicopter_last_time_command > 0.3 then
+                helicopter.helicopter_last_time_command = 0
                 update_heli_hud(player)
             end
         else
@@ -318,10 +320,10 @@ minetest.register_entity("helicopter:heli", {
 
                     --lets paint!!!!
 				    local color = item_name:sub(indx+1)
-				    local colstr = colors[color]
+				    local colstr = helicopter.colors[color]
                     --minetest.chat_send_all(color ..' '.. dump(colstr))
 				    if colstr then
-                        paint(self, colstr)
+                        helicopter.paint(self, colstr)
 					    itmstck:set_count(itmstck:get_count()-1)
 					    puncher:set_wielded_item(itmstck)
 				    end
@@ -344,7 +346,7 @@ minetest.register_entity("helicopter:heli", {
             end
 
             if self.hp <= 0 then
-                destroy(self)
+                helicopter.destroy(self)
             end
 
             --[[remove only when the pilot is not attached to the helicopter
@@ -411,7 +413,7 @@ minetest.register_entity("helicopter:heli", {
             if clicker then remove_heli_hud(clicker) end
         
 		elseif not self.driver_name then
-            local is_under_water = check_is_under_water(self.object)
+            local is_under_water = helicopter.check_is_under_water(self.object)
             if is_under_water then return end
 
 	        -- no driver => clicker is new driver
