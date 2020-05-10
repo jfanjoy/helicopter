@@ -297,7 +297,7 @@ minetest.register_entity("helicopter:heli", {
 			return
 		end
 
-        local touching_ground, liquid_below = check_node_below(self.object)
+        local touching_ground, liquid_below = helicopter.check_node_below(self.object)
         
         local is_attached = false
         if puncher:get_attach() == self.object then is_attached = true end
