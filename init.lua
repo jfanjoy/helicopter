@@ -173,7 +173,7 @@ minetest.register_entity("helicopter:heli", {
         helicopter.paint(self, self.color)
         local pos = self.object:get_pos()
 	    local pointer=minetest.add_entity(pos,'helicopter:pointer')
-        local energy_indicator_angle = get_pointer_angle(self.energy)
+        local energy_indicator_angle = helicopter.get_pointer_angle(self.energy)
 	    pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
 	    self.pointer = pointer
 
@@ -194,7 +194,7 @@ minetest.register_entity("helicopter:heli", {
 		local vel = self.object:get_velocity()
 
 		if self.driver_name then
-			touching_ground, liquid_below = check_node_below(self.object)
+			touching_ground, liquid_below = helicopter.check_node_below(self.object)
 			vel = helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel) or vel
 		end
 
@@ -203,11 +203,11 @@ minetest.register_entity("helicopter:heli", {
 		end
 
 		if touching_ground == nil then
-			touching_ground, liquid_below = check_node_below(self.object)
+			touching_ground, liquid_below = helicopter.check_node_below(self.object)
 		end
 
 		-- quadratic and constant deceleration
-		local speedsq = vector_length_sq(vel)
+		local speedsq = helicopter.vector_length_sq(vel)
 		local fq, fc
 		if touching_ground then
 			fq, fc = helicopter.friction_land_quadratic, helicopter.friction_land_constant
@@ -407,7 +407,7 @@ minetest.register_entity("helicopter:heli", {
 			-- player should stand again
 			player_api.set_animation(clicker, "stand")
 			-- gravity
-			self.object:set_acceleration(vector.multiply(vector_up, -helicopter.gravity))
+			self.object:set_acceleration(vector.multiply(helicopter.vector_up, -helicopter.gravity))
 
             --remove hud
             if clicker then remove_heli_hud(clicker) end
