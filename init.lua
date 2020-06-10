@@ -79,6 +79,30 @@ function helicopter.paint(self, colstr)
     end
 end
 
+-- attach player
+function helicopter.attach(self, player)
+    local name = player:get_player_name()
+    -- sound and animation
+    self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
+            {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
+    self.object:set_animation_frame_speed(30)
+
+    -- attach the driver
+    player:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
+    player:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
+    player_api.player_attached[name] = true
+    -- make the driver sit
+    minetest.after(0.2, function()
+        local player = minetest.get_player_by_name(name)
+        if player then
+            player_api.set_animation(player, "sit")
+            update_heli_hud(player)
+        end
+    end)
+    -- disable gravity
+    self.object:set_acceleration(vector.new())
+end
+
 -- destroy the helicopter
 function helicopter.destroy(self)
     if self.sound_handle then
@@ -157,6 +181,7 @@ minetest.register_entity("helicopter:heli", {
             stored_owner = self.owner,
             stored_hp = self.hp,
             stored_color = self.color,
+            stored_driver_name = self.driver_name,
         })
     end,
 
@@ -167,6 +192,7 @@ minetest.register_entity("helicopter:heli", {
             self.owner = data.stored_owner
             self.hp = data.stored_hp
             self.color = data.stored_color
+            self.driver_name = data.stored_driver_name
             --minetest.debug("loaded: ", self.energy)
         end
 
@@ -193,10 +219,8 @@ minetest.register_entity("helicopter:heli", {
 
 		local vel = self.object:get_velocity()
 
-		if self.driver_name then
-			touching_ground, liquid_below = helicopter.check_node_below(self.object)
-			vel = helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel) or vel
-		end
+		touching_ground, liquid_below = helicopter.check_node_below(self.object)
+		vel = helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel) or vel
 
 		if vel.x == 0 and vel.y == 0 and vel.z == 0 then
 			return
@@ -267,13 +291,27 @@ minetest.register_entity("helicopter:heli", {
                 update_heli_hud(player)
             end
         else
-            if self.sound_handle ~= nil then
-	            minetest.sound_stop(self.sound_handle)
-	            self.sound_handle = nil
+            -- for some error the player can be detached from the helicopter, so lets set him attached again
+            local can_stop = true
+            if self.owner and self.driver_name and touching_ground == false then
+                -- attach the driver again
+                local player = minetest.get_player_by_name(self.owner)
+                if player then
+                    helicopter.attach(self, player)
+                    can_stop = false
+                end
+            end
 
-                --why its here? cause if the sound is attached, player must so
-                local player_owner = minetest.get_player_by_name(self.owner)
-                if player_owner then remove_heli_hud(player_owner) end
+            if can_stop then
+                --detach player
+                if self.sound_handle ~= nil then
+	                minetest.sound_stop(self.sound_handle)
+	                self.sound_handle = nil
+
+                    --why its here? cause if the sound is attached, player must so
+                    local player_owner = minetest.get_player_by_name(self.owner)
+                    if player_owner then remove_heli_hud(player_owner) end
+                end
             end
         end
         self.last_vel = vel --saves velocity for collision comparation
@@ -423,25 +461,7 @@ minetest.register_entity("helicopter:heli", {
             self.hp = 50 -- why? cause I can desist from destroy
             ------------------
 
-	        -- sound and animation
-	        self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
-			        {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
-	        self.object:set_animation_frame_speed(30)
-
-	        -- attach the driver
-	        clicker:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
-	        clicker:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
-	        player_api.player_attached[name] = true
-	        -- make the driver sit
-	        minetest.after(0.2, function()
-		        local player = minetest.get_player_by_name(name)
-		        if player then
-			        player_api.set_animation(player, "sit")
-                    update_heli_hud(player)
-		        end
-	        end)
-	        -- disable gravity
-	        self.object:set_acceleration(vector.new())
+            helicopter.attach(self, clicker)
 		end
 	end,
 })
