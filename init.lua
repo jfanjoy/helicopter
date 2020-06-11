@@ -435,8 +435,10 @@ minetest.register_entity("helicopter:heli", {
 			-- driver clicked the object => driver gets off the vehicle
 			self.driver_name = nil
 			-- sound and animation
-			minetest.sound_stop(self.sound_handle)
-			self.sound_handle = nil
+            if self.sound_handle then
+			    minetest.sound_stop(self.sound_handle)
+			    self.sound_handle = nil
+            end
 			self.object:set_animation_frame_speed(0)
 			-- detach the player
 			clicker:set_detach()

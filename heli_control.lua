@@ -37,6 +37,9 @@ function helicopter.check_node_below(obj)
 end
 
 function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel_before)
+    if self.driver_name == nil then
+        return
+    end
 	local driver = minetest.get_player_by_name(self.driver_name)
 	if not driver then
 		-- there is no driver (eg. because driver left)
