@@ -346,7 +346,7 @@ minetest.register_entity("helicopter:heli", {
 
         if is_attached == true and touching_ground and item_name == "biofuel:biofuel" then
             --refuel
-            load_fuel(self, name)
+            load_fuel(self, self.owner)
         end
 
         if is_attached == false then
