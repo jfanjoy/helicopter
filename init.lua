@@ -199,7 +199,7 @@ minetest.register_entity("helicopter:heli", {
         helicopter.paint(self, self.color)
         local pos = self.object:get_pos()
 	    local pointer=minetest.add_entity(pos,'helicopter:pointer')
-        local energy_indicator_angle = helicopter.get_pointer_angle(self.energy)
+        local energy_indicator_angle = ((self.energy * 18) - 90) * -1
 	    pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
 	    self.pointer = pointer
 

@@ -37,7 +37,7 @@ function load_fuel(self, player_name)
 	        self.energy = self.energy + 1
             if self.energy > 10 then self.energy = 10 end
 
-            local energy_indicator_angle = helicopter.get_pointer_angle(self.energy)
+            local energy_indicator_angle = ((self.energy * 18) - 90) * -1
             self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
 
 	        --sound and animation
