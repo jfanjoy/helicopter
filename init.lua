@@ -194,6 +194,9 @@ minetest.register_entity("helicopter:heli", {
             self.color = data.stored_color
             self.driver_name = data.stored_driver_name
             --minetest.debug("loaded: ", self.energy)
+            local properties = self.object:get_properties()
+            properties.infotext = "Nice helicopter of " .. data.stored_owner
+            self.object:set_properties(properties)
         end
 
         helicopter.paint(self, self.color)
