@@ -195,7 +195,7 @@ minetest.register_entity("helicopter:heli", {
             self.driver_name = data.stored_driver_name
             --minetest.debug("loaded: ", self.energy)
             local properties = self.object:get_properties()
-            properties.infotext = "Nice helicopter of " .. data.stored_owner
+            properties.infotext = data.stored_owner .. " nice helicopter"
             self.object:set_properties(properties)
         end
 
