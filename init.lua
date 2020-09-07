@@ -435,9 +435,6 @@ minetest.register_entity("helicopter:heli", {
         end
 
 		if name == self.driver_name then
-            local properties = self.object:get_properties()
-            properties.infotext = "Nice helicopter of " .. self.owner
-            self.object:set_properties(properties)
 
 			-- driver clicked the object => driver gets off the vehicle
 			self.driver_name = nil
@@ -510,6 +507,10 @@ minetest.register_craftitem("helicopter:heli", {
         --[[
         ent.energy = imeta:get_int("energy")
         ent.hp = imeta:get_int("hp")]]--
+
+        local properties = ent.object:get_properties()
+        properties.infotext = owner .. " nice helicopter"
+        ent.object:set_properties(properties)
 
 		if not (creative_exists and placer and
 				creative.is_enabled_for(placer:get_player_name())) then
