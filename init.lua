@@ -536,7 +536,7 @@ if minetest.get_modpath("default") then
 	minetest.register_craft({
 		output = "helicopter:cabin",
 		recipe = {
-			{"default:copperblock ", "default:diamondblock", ""},
+			{"default:copperblock", "default:diamondblock", ""},
 			{"default:steelblock", "default:mese_block", "default:glass"},
 			{"default:steelblock", "xpanes:bar_flat", "xpanes:bar_flat"},
 		}
