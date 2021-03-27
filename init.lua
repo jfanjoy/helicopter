@@ -179,6 +179,8 @@ function helicopter.destroy(self)
 
     local pos = self.object:get_pos()
     if self.pointer then self.pointer:remove() end
+    if self.pilot_seat_base then self.pilot_seat_base:remove() end
+    if self.passenger_seat_base then self.passenger_seat_base:remove() end
 
     self.object:remove()
 
