@@ -89,8 +89,8 @@ function helicopter.attach(self, player)
     self.object:set_animation_frame_speed(30)
 
     -- attach the driver
-    player:set_attach(self.object, "", {x = 4.2, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
-    player:set_eye_offset({x = 4.2, y = 7, z = 2}, {x = 0, y = 8, z = -5})
+    player:set_attach(self.pilot_seat_base, "", {x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
+    player:set_eye_offset({x = 0, y = -3, z = 3}, {x = 0, y = 8, z = -5})
     player_api.player_attached[name] = true
     -- make the driver sit
     minetest.after(0.2, function()
@@ -134,8 +134,8 @@ function helicopter.attach_pax(self, player)
     local name = player:get_player_name()
     self._passenger = name
     -- attach the passenger
-    player:set_attach(self.object, "", {x = -4.2, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
-    player:set_eye_offset({x = -4.2, y = 7, z = 3}, {x = 0, y = 8, z = -5})
+    player:set_attach(self.passenger_seat_base, "", {x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
+    player:set_eye_offset({x = 0, y = -3, z = 3}, {x = 0, y = 8, z = -5})
     player_api.player_attached[name] = true
     -- make the driver sit
     minetest.after(0.2, function()
@@ -210,6 +210,28 @@ end
 -- entity
 --
 
+minetest.register_entity('helicopter:seat_base',{
+initial_properties = {
+	physical = false,
+	collide_with_objects=false,
+	pointable=false,
+	visual = "mesh",
+	mesh = "seat_base.b3d",
+    textures = {"helicopter_black.png",},
+	},
+	
+    on_activate = function(self,std)
+	    self.sdata = minetest.deserialize(std) or {}
+	    if self.sdata.remove then self.object:remove() end
+    end,
+	    
+    get_staticdata=function(self)
+      self.sdata.remove=true
+      return minetest.serialize(self.sdata)
+    end,
+	
+})
+
 minetest.register_entity("helicopter:heli", {
 	initial_properties = {
 		physical = true,
@@ -267,6 +289,14 @@ minetest.register_entity("helicopter:heli", {
         local energy_indicator_angle = ((self.energy * 18) - 90) * -1
 	    pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
 	    self.pointer = pointer
+
+        local pilot_seat_base=minetest.add_entity(pos,'helicopter:seat_base')
+        pilot_seat_base:set_attach(self.object,'',{x=4.2,y=10,z=2},{x=0,y=0,z=0})
+	    self.pilot_seat_base = pilot_seat_base
+
+        local passenger_seat_base=minetest.add_entity(pos,'helicopter:seat_base')
+        passenger_seat_base:set_attach(self.object,'',{x=-4.2,y=10,z=2},{x=0,y=0,z=0})
+	    self.passenger_seat_base = passenger_seat_base
 
 		-- set the animation once and later only change the speed
 		self.object:set_animation({x = 0, y = 11}, 0, 0, true)
@@ -326,7 +356,9 @@ minetest.register_entity("helicopter:heli", {
             if player then
                 local player_attach = player:get_attach()
                 if player_attach then
-                    if player_attach == self.object then is_attached = true end
+                    --XXXXXXXX
+                    if player_attach == self.pilot_seat_base then is_attached = true end
+                    --XXXXXXXX
                 end
             end
         end
@@ -402,8 +434,10 @@ minetest.register_entity("helicopter:heli", {
 
         local touching_ground, liquid_below = helicopter.check_node_below(self.object)
         
+        --XXXXXXXX
         local is_attached = false
-        if puncher:get_attach() == self.object then is_attached = true end
+        if puncher:get_attach() == self.pilot_seat_base then is_attached = true end
+        --XXXXXXXX
 
         local itmstck=puncher:get_wielded_item()
         local item_name = ""
@@ -487,11 +521,11 @@ minetest.register_entity("helicopter:heli", {
                 if self._passenger == nil then
                     helicopter.attach_pax(self, clicker)
                 else
-                    helicopter.detach_pax(self, clicker)
+                    helicopter.dettach_pax(self, clicker)
                 end
             else
                 if self._passenger then
-                    helicopter.detach_pax(self, clicker)
+                    helicopter.dettach_pax(self, clicker)
                 end
             end
         end

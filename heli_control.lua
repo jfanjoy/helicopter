@@ -1,8 +1,8 @@
 --global constants
 
 helicopter.gravity = tonumber(minetest.settings:get("movement_gravity")) or 9.8
-helicopter.tilting_speed = 1
-helicopter.tilting_max = 0.35
+helicopter.tilting_speed = 0.3
+helicopter.tilting_max = 0.15
 helicopter.power_max = 15
 helicopter.power_min = 0.2 -- if negative, the helicopter can actively fly downwards
 helicopter.wanted_vert_speed = 10
@@ -55,7 +55,7 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
 		if ctrl.jump then
 			vert_vel_goal = vert_vel_goal + helicopter.wanted_vert_speed
 		end
-		if ctrl.sneak then
+		if ctrl.aux1 then
 			vert_vel_goal = vert_vel_goal - helicopter.wanted_vert_speed
 		end
 	else
@@ -64,6 +64,8 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
 
 	-- rotation
 	if not touching_ground then
+        local rotation = self.object:get_rotation()
+        local yaw = rotation.y
 		local tilting_goal = vector.new()
 		if ctrl.up then
 			tilting_goal.z = tilting_goal.z + 1
@@ -71,12 +73,23 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
 		if ctrl.down then
 			tilting_goal.z = tilting_goal.z - 1
 		end
-		if ctrl.right then
-			tilting_goal.x = tilting_goal.x + 1
-		end
-		if ctrl.left then
-			tilting_goal.x = tilting_goal.x - 1
-		end
+        if ctrl.sneak then
+		    if ctrl.right then
+			    tilting_goal.x = tilting_goal.x + 1
+		    end
+		    if ctrl.left then
+			    tilting_goal.x = tilting_goal.x - 1
+		    end
+        else
+		    if ctrl.right then
+			    yaw = yaw - 0.02
+                tilting_goal.x = tilting_goal.x + 0.2
+		    end
+		    if ctrl.left then
+			    yaw = yaw + 0.02
+                tilting_goal.x = tilting_goal.x - 0.2
+		    end
+        end
 		tilting_goal = vector.multiply(vector.normalize(tilting_goal), helicopter.tilting_max)
 
 		-- tilting
@@ -101,7 +114,9 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
 		)
 		rot = matrix3.to_pitch_yaw_roll(rot_mat)
 
-		rot.y = driver:get_look_horizontal()
+		--rot.y = driver:get_look_horizontal()
+        rot.y = yaw
+        
 
 	else
 		rot.x = 0
