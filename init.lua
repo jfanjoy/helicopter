@@ -82,14 +82,15 @@ end
 -- attach player
 function helicopter.attach(self, player)
     local name = player:get_player_name()
+    self.driver_name = name
     -- sound and animation
     self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
             {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
     self.object:set_animation_frame_speed(30)
 
     -- attach the driver
-    player:set_attach(self.object, "", {x = 0, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
-    player:set_eye_offset({x = 0, y = 7, z = 3}, {x = 0, y = 8, z = -5})
+    player:set_attach(self.object, "", {x = 4.2, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
+    player:set_eye_offset({x = 4.2, y = 7, z = 2}, {x = 0, y = 8, z = -5})
     player_api.player_attached[name] = true
     -- make the driver sit
     minetest.after(0.2, function()
@@ -101,6 +102,62 @@ function helicopter.attach(self, player)
     end)
     -- disable gravity
     self.object:set_acceleration(vector.new())
+end
+
+-- dettach player
+function helicopter.dettach(self, player)
+    local name = player:get_player_name()
+    
+    -- driver clicked the object => driver gets off the vehicle
+    self.driver_name = nil
+    -- sound and animation
+    if self.sound_handle then
+        minetest.sound_stop(self.sound_handle)
+        self.sound_handle = nil
+    end
+    self.object:set_animation_frame_speed(0)
+    -- detach the player
+    player:set_detach()
+    player:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
+    player_api.player_attached[name] = nil
+    -- player should stand again
+    player_api.set_animation(player, "stand")
+    -- gravity
+    self.object:set_acceleration(vector.multiply(helicopter.vector_up, -helicopter.gravity))
+
+    --remove hud
+    if player then remove_heli_hud(player) end
+end
+
+-- attach passenger
+function helicopter.attach_pax(self, player)
+    local name = player:get_player_name()
+    self._passenger = name
+    -- attach the passenger
+    player:set_attach(self.object, "", {x = -4.2, y = 10.5, z = 2}, {x = 0, y = 0, z = 0})
+    player:set_eye_offset({x = -4.2, y = 7, z = 3}, {x = 0, y = 8, z = -5})
+    player_api.player_attached[name] = true
+    -- make the driver sit
+    minetest.after(0.2, function()
+        local player = minetest.get_player_by_name(name)
+        if player then
+            player_api.set_animation(player, "sit")
+        end
+    end)
+end
+
+-- dettach passenger
+function helicopter.dettach_pax(self, player)
+    local name = player:get_player_name()
+    
+    -- driver clicked the object => driver gets off the vehicle
+    self._passenger = nil
+    -- detach the player
+    player:set_detach()
+    player:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
+    player_api.player_attached[name] = nil
+    -- player should stand again
+    player_api.set_animation(player, "stand")
 end
 
 -- destroy the helicopter
@@ -161,7 +218,11 @@ minetest.register_entity("helicopter:heli", {
 		selectionbox = {-1,0,-1, 1,0.3,1},
 		visual = "mesh",
 		mesh = "helicopter_heli.b3d",
-        textures = {"helicopter_interior_black.png", "helicopter_metal.png", "helicopter_strips.png", "helicopter_painting.png", "helicopter_black.png", "helicopter_aluminum.png", "helicopter_glass.png", "helicopter_glass.png", "helicopter_interior.png", "helicopter_panel.png", "helicopter_colective.png", "helicopter_painting.png", "helicopter_rotors.png", "helicopter_interior_black.png",},
+        backface_culling = false,
+        textures = {"helicopter_interior_black.png", "helicopter_metal.png", "helicopter_strips.png",
+                "helicopter_painting.png", "helicopter_black.png", "helicopter_aluminum.png", "helicopter_glass.png",
+                "helicopter_interior.png", "helicopter_panel.png", "helicopter_colective.png", "helicopter_painting.png",
+                "helicopter_rotors.png", "helicopter_interior_black.png",},
 	},
 
 	driver_name = nil,
@@ -174,6 +235,7 @@ minetest.register_entity("helicopter:heli", {
     last_vel = vector.new(),
     hp = 50,
     color = "#0063b0",
+    _passenger = nil,
 
     get_staticdata = function(self) -- unloaded/unloads ... is now saved
         return minetest.serialize({
@@ -390,35 +452,6 @@ minetest.register_entity("helicopter:heli", {
                 helicopter.destroy(self)
             end
 
-            --[[remove only when the pilot is not attached to the helicopter
-		    if self.sound_handle then
-			    minetest.sound_stop(self.sound_handle)
-			    self.sound_handle = nil
-		    end
-		    if self.driver_name then
-			    -- detach the driver first (puncher must be driver)
-			    puncher:set_detach()
-			    puncher:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
-			    player_api.player_attached[name] = nil
-			    -- player should stand again
-			    player_api.set_animation(puncher, "stand")
-			    self.driver_name = nil
-		    end
-
-            if self.pointer then self.pointer:remove() end
-		    self.object:remove()
-
-		    minetest.handle_node_drops(self.object:get_pos(), {"helicopter:heli"}, puncher)]]--
-            --[[local inv = puncher:get_inventory()
-            if inv then
-	            for _, item in ipairs({"helicopter:heli"}) do
-                    local itemstack = inv:add_item("main", item)
-                    local imeta = itemstack:get_meta()
-                    imeta:set_int("damage", self.damage)
-                    imeta:set_int("energy", self.energy)
-	            end
-            end]]--
-
         end
         
 	end,
@@ -429,46 +462,39 @@ minetest.register_entity("helicopter:heli", {
 		end
 
 		local name = clicker:get_player_name()
-        if self.owner and self.owner ~= name and self.owner ~= "" then return end
+
         if self.owner == "" then
             self.owner = name
         end
 
-		if name == self.driver_name then
+        if self.owner == name then
+		    if name == self.driver_name then
+			    -- driver clicked the object => driver gets off the vehicle
+                helicopter.dettach(self, clicker)
+		    elseif not self.driver_name then
+                local is_under_water = helicopter.check_is_under_water(self.object)
+                if is_under_water then return end
+                -- temporary------
+                self.hp = 50 -- why? cause I can desist from destroy
+                ------------------
 
-			-- driver clicked the object => driver gets off the vehicle
-			self.driver_name = nil
-			-- sound and animation
-            if self.sound_handle then
-			    minetest.sound_stop(self.sound_handle)
-			    self.sound_handle = nil
+                helicopter.attach(self, clicker)
+		    end
+        else
+            --passenger section
+            --only can enter when the pilot is inside
+            if self.driver_name then
+                if self._passenger == nil then
+                    helicopter.attach_pax(self, clicker)
+                else
+                    helicopter.detach_pax(self, clicker)
+                end
+            else
+                if self._passenger then
+                    helicopter.detach_pax(self, clicker)
+                end
             end
-			self.object:set_animation_frame_speed(0)
-			-- detach the player
-			clicker:set_detach()
-			clicker:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
-			player_api.player_attached[name] = nil
-			-- player should stand again
-			player_api.set_animation(clicker, "stand")
-			-- gravity
-			self.object:set_acceleration(vector.multiply(helicopter.vector_up, -helicopter.gravity))
-
-            --remove hud
-            if clicker then remove_heli_hud(clicker) end
-        
-		elseif not self.driver_name then
-            local is_under_water = helicopter.check_is_under_water(self.object)
-            if is_under_water then return end
-
-	        -- no driver => clicker is new driver
-	        self.driver_name = name
-
-            -- temporary------
-            self.hp = 50 -- why? cause I can desist from destroy
-            ------------------
-
-            helicopter.attach(self, clicker)
-		end
+        end
 	end,
 })
 
