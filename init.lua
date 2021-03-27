@@ -347,9 +347,9 @@ minetest.register_entity("helicopter:heli", {
         local item_name = ""
         if itmstck then item_name = itmstck:get_name() end
 
-        if is_attached == true and touching_ground and item_name == "biofuel:biofuel" then
+        if is_attached == true and touching_ground then
             --refuel
-            load_fuel(self, self.owner)
+            helicopter.loadFuel(self, self.owner)
         end
 
         if is_attached == false then
