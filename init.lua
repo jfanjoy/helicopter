@@ -90,7 +90,7 @@ function helicopter.attach(self, player)
 
     -- attach the driver
     player:set_attach(self.pilot_seat_base, "", {x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
-    player:set_eye_offset({x = 0, y = -3, z = 3}, {x = 0, y = 8, z = -5})
+    player:set_eye_offset({x = 0, y = -4, z = 1}, {x = 0, y = 8, z = -5})
     player_api.player_attached[name] = true
     -- make the driver sit
     minetest.after(0.2, function()
@@ -135,7 +135,7 @@ function helicopter.attach_pax(self, player)
     self._passenger = name
     -- attach the passenger
     player:set_attach(self.passenger_seat_base, "", {x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
-    player:set_eye_offset({x = 0, y = -3, z = 3}, {x = 0, y = 8, z = -5})
+    player:set_eye_offset({x = 0, y = -4, z = 1}, {x = 0, y = 8, z = -5})
     player_api.player_attached[name] = true
     -- make the driver sit
     minetest.after(0.2, function()
@@ -260,6 +260,7 @@ minetest.register_entity("helicopter:heli", {
     hp = 50,
     color = "#0063b0",
     _passenger = nil,
+    _by_mouse = true,
 
     get_staticdata = function(self) -- unloaded/unloads ... is now saved
         return minetest.serialize({

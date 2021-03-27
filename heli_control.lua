@@ -1,14 +1,16 @@
 --global constants
 
 helicopter.gravity = tonumber(minetest.settings:get("movement_gravity")) or 9.8
-helicopter.tilting_speed = 0.3
+helicopter.tilting_speed = 0.7
 helicopter.tilting_max = 0.15
 helicopter.power_max = 15
 helicopter.power_min = 0.2 -- if negative, the helicopter can actively fly downwards
-helicopter.wanted_vert_speed = 10
+helicopter.wanted_vert_speed = 5
 
 helicopter.vector_up = vector.new(0, 1, 0)
 helicopter.vector_forward = vector.new(0, 0, 1)
+
+helicopter.last_time_command = 0
 
 function helicopter.vector_length_sq(v)
 	return v.x * v.x + v.y * v.y + v.z * v.z
@@ -30,10 +32,24 @@ function helicopter.check_node_below(obj)
 end
 
 function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel_before)
+    helicopter.last_time_command = helicopter.last_time_command + dtime
+    if helicopter.last_time_command > 1 then helicopter.last_time_command = 1 end
+
     if self.driver_name == nil then
         return
     end
-	local driver = minetest.get_player_by_name(self.driver_name)
+    local driver = minetest.get_player_by_name(self.driver_name)
+	local ctrl = driver:get_player_control()
+
+    if ctrl.aux1 and helicopter.last_time_command > 0.3 then
+        helicopter.last_time_command = 0
+        if self._by_mouse == true then
+            self._by_mouse = false
+        else
+            self._by_mouse = true
+        end
+    end
+	
 	if not driver then
 		-- there is no driver (eg. because driver left)
 		self.driver_name = nil
@@ -47,7 +63,6 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
 		return
 	end
     
-	local ctrl = driver:get_player_control()
 	local rot = self.object:get_rotation()
 
 	local vert_vel_goal = 0
@@ -55,7 +70,7 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
 		if ctrl.jump then
 			vert_vel_goal = vert_vel_goal + helicopter.wanted_vert_speed
 		end
-		if ctrl.aux1 then
+		if ctrl.sneak then
 			vert_vel_goal = vert_vel_goal - helicopter.wanted_vert_speed
 		end
 	else
@@ -68,17 +83,17 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
         local yaw = rotation.y
 		local tilting_goal = vector.new()
 		if ctrl.up then
-			tilting_goal.z = tilting_goal.z + 1
+			tilting_goal.z = tilting_goal.z + 4
 		end
 		if ctrl.down then
-			tilting_goal.z = tilting_goal.z - 1
+			tilting_goal.z = tilting_goal.z - 4
 		end
-        if ctrl.sneak then
+        if self._by_mouse == true then
 		    if ctrl.right then
-			    tilting_goal.x = tilting_goal.x + 1
+			    tilting_goal.x = tilting_goal.x + 4
 		    end
 		    if ctrl.left then
-			    tilting_goal.x = tilting_goal.x - 1
+			    tilting_goal.x = tilting_goal.x - 4
 		    end
         else
 		    if ctrl.right then
@@ -114,8 +129,11 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
 		)
 		rot = matrix3.to_pitch_yaw_roll(rot_mat)
 
-		--rot.y = driver:get_look_horizontal()
-        rot.y = yaw
+        if self._by_mouse == true then
+		    rot.y = driver:get_look_horizontal()
+        else
+            rot.y = yaw
+        end
         
 
 	else
@@ -141,7 +159,7 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
         local y_pos_reference = position.y - 200 --after altitude 200 the power need will increase
         if y_pos_reference > 0 then altitude_consumption_variable = ((y_pos_reference/1000)^2) end
 
-        local consumed_power = (power/1800) + altitude_consumption_variable
+        local consumed_power = (power/1000) + altitude_consumption_variable
         self.energy = self.energy - consumed_power;
 
         local energy_indicator_angle = ((self.energy * 18) - 90) * -1
