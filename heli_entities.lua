@@ -236,13 +236,10 @@ minetest.register_entity("helicopter:heli", {
         local item_name = ""
         if itmstck then item_name = itmstck:get_name() end
 
-        if is_attached == true and touching_ground then
-            --refuel
-            helicopter.loadFuel(self, self.owner)
-        end
-
         if is_attached == false then
-
+            if touching_ground then
+                if helicopter.loadFuel(self, self.owner) then return end
+            end
             -- deal with painting or destroying
 		    if itmstck then
 			    local _,indx = item_name:find('dye:')
