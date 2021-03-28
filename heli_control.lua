@@ -160,7 +160,7 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
         local y_pos_reference = position.y - 200 --after altitude 200 the power need will increase
         if y_pos_reference > 0 then altitude_consumption_variable = ((y_pos_reference/1000)^2) end
 
-        local consumed_power = (power/1000) + altitude_consumption_variable
+        local consumed_power = (power/1500) + altitude_consumption_variable
         self.energy = self.energy - consumed_power;
 
         local energy_indicator_angle = ((self.energy * 18) - 90) * -1
