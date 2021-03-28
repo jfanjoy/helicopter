@@ -39,17 +39,7 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
         return
     end
     local driver = minetest.get_player_by_name(self.driver_name)
-	local ctrl = driver:get_player_control()
 
-    if ctrl.aux1 and helicopter.last_time_command > 0.3 then
-        helicopter.last_time_command = 0
-        if self._by_mouse == true then
-            self._by_mouse = false
-        else
-            self._by_mouse = true
-        end
-    end
-	
 	if not driver then
 		-- there is no driver (eg. because driver left)
 		self.driver_name = nil
@@ -62,6 +52,17 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
 		self.object:set_acceleration(vector.multiply(helicopter.vector_up, -helicopter.gravity))
 		return
 	end
+
+    local ctrl = driver:get_player_control()
+
+    if ctrl.aux1 and helicopter.last_time_command > 0.3 then
+        helicopter.last_time_command = 0
+        if self._by_mouse == true then
+            self._by_mouse = false
+        else
+            self._by_mouse = true
+        end
+    end
     
 	local rot = self.object:get_rotation()
 
