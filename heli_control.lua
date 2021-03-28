@@ -1,8 +1,8 @@
 --global constants
 
 helicopter.gravity = tonumber(minetest.settings:get("movement_gravity")) or 9.8
-helicopter.tilting_speed = 0.7
-helicopter.tilting_max = 0.15
+helicopter.tilting_speed = 1
+helicopter.tilting_max = 0.20
 helicopter.power_max = 15
 helicopter.power_min = 0.2 -- if negative, the helicopter can actively fly downwards
 helicopter.wanted_vert_speed = 5

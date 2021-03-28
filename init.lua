@@ -260,7 +260,7 @@ minetest.register_entity("helicopter:heli", {
     hp = 50,
     color = "#0063b0",
     _passenger = nil,
-    _by_mouse = true,
+    _by_mouse = false,
 
     get_staticdata = function(self) -- unloaded/unloads ... is now saved
         return minetest.serialize({
