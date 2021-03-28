@@ -1,3 +1,6 @@
+helicopter.gravity = tonumber(minetest.settings:get("movement_gravity")) or 9.8
+helicopter.vector_up = vector.new(0, 1, 0)
+
 function helicopter.get_hipotenuse_value(point1, point2)
     return math.sqrt((point1.x - point2.x) ^ 2 + (point1.y - point2.y) ^ 2 + (point1.z - point2.z) ^ 2)
 end
@@ -79,7 +82,7 @@ function helicopter.dettach(self, player)
     player_api.player_attached[name] = nil
     player:set_eye_offset({x=0,y=0,z=0},{x=0,y=0,z=0})
     player_api.set_animation(player, "stand")
-    self.object:set_acceleration(vector.multiply(trike.vector_up, -trike.gravity))
+    self.object:set_acceleration(vector.multiply(helicopter.vector_up, -helicopter.gravity))
 
     --remove hud
     if player then remove_heli_hud(player) end
