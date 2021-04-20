@@ -177,7 +177,7 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
 		if touching_ground or liquid_below then
             --criar uma fucao pra isso pois ela repete na linha 268
 			-- sound and animation
-			minetest.sound_stop(self.sound_handle)
+            if self.sound_handle then minetest.sound_stop(self.sound_handle) end
 			self.object:set_animation_frame_speed(0)
 			-- gravity
 			self.object:set_acceleration(vector.multiply(helicopter.vector_up, -helicopter.gravity))
