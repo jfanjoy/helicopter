@@ -1,0 +1,4 @@
+
+# If enabled, places helicopter in inventory instead of destroying it
+# when punched.
+helicopter.pick_up (Place in inventory) bool false
