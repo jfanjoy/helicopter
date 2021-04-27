@@ -170,7 +170,7 @@ minetest.register_entity("helicopter:heli", {
                     pitch = 1.0,
                 })
                 --[[if self.damage > 100 then --if acumulated damage is greater than 100, adieu
-                    helicopter.destroy(self)   
+                    helicopter.destroy(self, player)   
                 end]]--
             end
 
@@ -273,7 +273,7 @@ minetest.register_entity("helicopter:heli", {
             end
 
             if self.hp_max <= 0 then
-                helicopter.destroy(self)
+                helicopter.destroy(self, puncher)
             end
 
         end
