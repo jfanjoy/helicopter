@@ -120,7 +120,7 @@ function helicopter.dettach_pax(self, player)
 end
 
 -- destroy the helicopter
-function helicopter.destroy(self)
+function helicopter.destroy(self, puncher)
     if self.sound_handle then
         minetest.sound_stop(self.sound_handle)
         self.sound_handle = nil
