@@ -1,4 +1,7 @@
 
+--- Determines gravity force on helicopter.
+helicopter.gravity = tonumber(minetest.settings:get("movement_gravity") or 9.8)
+
 --- Determines handling of punched helicopter.
 --
 --  If `false`, helicopter is destroyed. Otherwise, it is added to inventory.

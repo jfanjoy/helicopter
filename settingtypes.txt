@@ -1,4 +1,7 @@
 
+# Determines gravity force on helicopter.
+movement_gravity (Movement gravity) float 9.8
+
 # If enabled, places helicopter in inventory instead of destroying it
 # when punched.
 helicopter.pick_up (Place in inventory) bool false
