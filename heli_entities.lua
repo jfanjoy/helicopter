@@ -280,6 +280,10 @@ minetest.register_entity("helicopter:heli", {
                         minetest.chat_send_player(puncher:get_player_name(),
                             "You do not have room in your inventory")
                     else
+                        if self.pointer then self.pointer:remove() end
+                        if self.pilot_seat_base then self.pilot_seat_base:remove() end
+                        if self.passenger_seat_base then self.passenger_seat_base:remove() end
+
                         self.object:remove()
                         pinv:add_item("main", stack)
                     end
