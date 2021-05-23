@@ -51,6 +51,8 @@ end
 
 function helicopter.loadFuel(self, player_name)
     local player = minetest.get_player_by_name(player_name)
+    if not player then return end
+
     local inv = player:get_inventory()
 
     local itmstck=player:get_wielded_item()
