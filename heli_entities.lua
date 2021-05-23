@@ -274,8 +274,15 @@ minetest.register_entity("helicopter:heli", {
 
             if self.hp_max <= 0 then
                 if helicopter.pick_up then
-                    self.object:remove()
-                    puncher:get_inventory():add_item("main", "helicopter:heli")
+                    local pinv = puncher:get_inventory()
+                    local stack = ItemStack("helicopter:heli")
+                    if not pinv:room_for_item("main", stack) then
+                        minetest.chat_send_player(puncher:get_player_name(),
+                            "You do not have room in your inventory")
+                    else
+                        self.object:remove()
+                        pinv:add_item("main", stack)
+                    end
                 else
                     helicopter.destroy(self, puncher)
                 end
