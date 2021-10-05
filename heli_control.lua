@@ -64,11 +64,16 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
     end
     
 	local rot = self.object:get_rotation()
+    local position = self.object:get_pos()
 
+    local max_height = 1500
 	local vert_vel_goal = 0
 	if not liquid_below then
 		if ctrl.jump then
-			vert_vel_goal = vert_vel_goal + helicopter.wanted_vert_speed
+            local compensated_vert_speed = helicopter.wanted_vert_speed
+            local curr_percent_height = (100 - ((position.y * 100) / max_height))/100
+            compensated_vert_speed = compensated_vert_speed * curr_percent_height
+			vert_vel_goal = vert_vel_goal + compensated_vert_speed
 		end
 		if ctrl.sneak then
 			vert_vel_goal = vert_vel_goal - helicopter.wanted_vert_speed
@@ -152,14 +157,8 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
     -- calculate energy consumption --
     ----------------------------------
     if self.energy > 0 and touching_ground == false then
-        local position = self.object:get_pos()
-        local altitude_consumption_variable = 0
 
-        -- if gaining altitude, it consumes more power
-        local y_pos_reference = position.y - 200 --after altitude 200 the power need will increase
-        if y_pos_reference > 0 then altitude_consumption_variable = ((y_pos_reference/1000)^2) end
-
-        local consumed_power = (power/1500) + altitude_consumption_variable
+        local consumed_power = (power/1500)
         self.energy = self.energy - consumed_power;
 
         local energy_indicator_angle = ((self.energy * 18) - 90) * -1
