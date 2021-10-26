@@ -58,6 +58,8 @@ minetest.register_entity("helicopter:heli", {
 	},
 
 	driver_name = nil,
+    shaded = true,
+    show_on_minimap = true,
 	sound_handle = nil,
 	tilting = vector.new(),
     energy = 0.001,
