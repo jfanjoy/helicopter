@@ -3,7 +3,7 @@
 --
 helicopter.fuel = {['biofuel:biofuel'] = 1,['biofuel:bottle_fuel'] = 1,['biofuel:phial_fuel'] = 0.25, ['biofuel:fuel_can'] = 10}
 
-minetest.register_entity('helicopter:pointer',{
+minetest.register_entity("nss_helicopter:pointer",{
 initial_properties = {
 	physical = false,
 	collide_with_objects=false,

@@ -20,7 +20,7 @@ local color_def = {
 	["#ff0098"] = "Magenta",
 }
 
-minetest.register_entity('helicopter:seat_base',{
+minetest.register_entity("nss_helicopter:seat_base",{
 initial_properties = {
 	physical = false,
 	collide_with_objects=false,
@@ -42,7 +42,7 @@ initial_properties = {
 
 })
 
-minetest.register_entity("helicopter:heli", {
+minetest.register_entity("nss_helicopter:heli", {
 	initial_properties = {
 		physical = true,
 		collide_with_objects = true,
@@ -98,16 +98,16 @@ minetest.register_entity("helicopter:heli", {
 
         helicopter.paint(self, self.color)
         local pos = self.object:get_pos()
-	    local pointer=minetest.add_entity(pos,'helicopter:pointer')
+	    local pointer=minetest.add_entity(pos,'nss_helicopter:pointer')
         local energy_indicator_angle = ((self.energy * 18) - 90) * -1
 	    pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
 	    self.pointer = pointer
 
-        local pilot_seat_base=minetest.add_entity(pos,'helicopter:seat_base')
+        local pilot_seat_base=minetest.add_entity(pos,'nss_helicopter:seat_base')
         pilot_seat_base:set_attach(self.object,'',{x=4.2,y=10,z=2},{x=0,y=0,z=0})
 	    self.pilot_seat_base = pilot_seat_base
 
-        local passenger_seat_base=minetest.add_entity(pos,'helicopter:seat_base')
+        local passenger_seat_base=minetest.add_entity(pos,'nss_helicopter:seat_base')
         passenger_seat_base:set_attach(self.object,'',{x=-4.2,y=10,z=2},{x=0,y=0,z=0})
 	    self.passenger_seat_base = passenger_seat_base
 
@@ -295,7 +295,7 @@ minetest.register_entity("helicopter:heli", {
             if self.hp_max <= 0 then
                 if helicopter.punch_inv then
                     local pinv = puncher:get_inventory()
-                    local stack = ItemStack("helicopter:heli")
+                    local stack = ItemStack("nss_helicopter:heli")
                     local imeta = stack:get_meta()
 
                     -- store fuel level & color

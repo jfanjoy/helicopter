@@ -3,17 +3,17 @@
 --
 
 -- blades
-minetest.register_craftitem("helicopter:blades",{
+minetest.register_craftitem("nss_helicopter:blades",{
 	description = "Helicopter Blades",
 	inventory_image = "helicopter_blades_inv.png",
 })
 -- cabin
-minetest.register_craftitem("helicopter:cabin",{
+minetest.register_craftitem("nss_helicopter:cabin",{
 	description = "Cabin for Helicopter",
 	inventory_image = "helicopter_cabin_inv.png",
 })
 -- heli
-minetest.register_craftitem("helicopter:heli", {
+minetest.register_craftitem("nss_helicopter:heli", {
 	description = "Helicopter",
 	inventory_image = "helicopter_heli_inv.png",
 
@@ -30,7 +30,7 @@ minetest.register_craftitem("helicopter:heli", {
 		if color == "" then color = nil end
 		local fuel = math.floor(imeta:get_float("fuel") * 100) / 100
 
-		local obj = minetest.add_entity(pointed_thing.above, "helicopter:heli")
+		local obj = minetest.add_entity(pointed_thing.above, "nss_helicopter:heli")
 		local ent = obj:get_luaentity()
 		local owner = placer:get_player_name()
 		ent.owner = owner
@@ -58,7 +58,7 @@ minetest.register_craftitem("helicopter:heli", {
 
 if minetest.get_modpath("default") then
 	minetest.register_craft({
-		output = "helicopter:blades",
+		output = "nss_helicopter:blades",
 		recipe = {
 			{"",                    "default:steel_ingot", ""},
 			{"default:steel_ingot", "default:diamond",         "default:steel_ingot"},
@@ -66,7 +66,7 @@ if minetest.get_modpath("default") then
 		}
 	})
 	minetest.register_craft({
-		output = "helicopter:cabin",
+		output = "nss_helicopter:cabin",
 		recipe = {
 			{"default:copperblock", "default:diamondblock", ""},
 			{"default:steelblock", "default:mese_block", "default:glass"},
@@ -74,10 +74,10 @@ if minetest.get_modpath("default") then
 		}
 	})
 	minetest.register_craft({
-		output = "helicopter:heli",
+		output = "nss_helicopter:heli",
 		recipe = {
-			{"",                  "helicopter:blades"},
-			{"helicopter:blades", "helicopter:cabin"},
+			{"",                  "nss_helicopter:blades"},
+			{"nss_helicopter:blades", "nss_helicopter:cabin"},
 		}
 	})
 end

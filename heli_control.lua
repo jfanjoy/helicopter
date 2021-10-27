@@ -16,7 +16,7 @@ function helicopter.vector_length_sq(v)
 end
 
 if not minetest.global_exists("matrix3") then
-	dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "matrix.lua")
+	dofile(minetest.get_modpath("nss_helicopter") .. DIR_DELIM .. "matrix.lua")
 end
 
 function helicopter.check_node_below(obj)
@@ -166,7 +166,7 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
             self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
         else
             --in case it have lost the entity by some conflict
-            self.pointer=minetest.add_entity({x=0,y=11.26,z=9.37},'helicopter:pointer')
+            self.pointer=minetest.add_entity({x=0,y=11.26,z=9.37},"nss_helicopter:pointer")
             self.pointer:set_attach(self.object,'',{x=0,y=11.26,z=9.37},{x=0,y=0,z=energy_indicator_angle})
         end
     end

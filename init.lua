@@ -29,14 +29,14 @@ helicopter.colors ={
     yellow='#ffe400',
 }
 
-dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "settings.lua")
+dofile(minetest.get_modpath("nss_helicopter") .. DIR_DELIM .. "settings.lua")
 --dofile(minetest.get_modpath(minetest.get_current_modname()) .. DIR_DELIM .. "heli_hud.lua")
-dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_hud.lua")
-dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_utilities.lua")
-dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_entities.lua")
-dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_crafts.lua")
-dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_control.lua")
-dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "heli_fuel_management.lua")
+dofile(minetest.get_modpath("nss_helicopter") .. DIR_DELIM .. "heli_hud.lua")
+dofile(minetest.get_modpath("nss_helicopter") .. DIR_DELIM .. "heli_utilities.lua")
+dofile(minetest.get_modpath("nss_helicopter") .. DIR_DELIM .. "heli_entities.lua")
+dofile(minetest.get_modpath("nss_helicopter") .. DIR_DELIM .. "heli_crafts.lua")
+dofile(minetest.get_modpath("nss_helicopter") .. DIR_DELIM .. "heli_control.lua")
+dofile(minetest.get_modpath("nss_helicopter") .. DIR_DELIM .. "heli_fuel_management.lua")
 
 
 helicopter.helicopter_last_time_command = 0
@@ -46,7 +46,7 @@ helicopter.helicopter_last_time_command = 0
 --
 
 if not minetest.global_exists("matrix3") then
-	dofile(minetest.get_modpath("helicopter") .. DIR_DELIM .. "matrix.lua")
+	dofile(minetest.get_modpath("nss_helicopter") .. DIR_DELIM .. "matrix.lua")
 end
 
 helicopter.creative = minetest.global_exists("creative")
