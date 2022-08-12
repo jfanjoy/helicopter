@@ -35,6 +35,25 @@ function helicopter.setText(self)
     end
 end
 
+--returns 0 for old, 1 for new
+function helicopter.detect_player_api(player)
+    local player_proterties = player:get_properties()
+    local mesh = "character.b3d"
+    if player_proterties.mesh == mesh then
+        local models = player_api.registered_models
+        local character = models[mesh]
+        if character then
+            if character.animations.sit.eye_height then
+                return 1
+            else
+                return 0
+            end
+        end
+    end
+
+    return 0
+end
+
 -- attach player
 function helicopter.attach(self, player)
     local name = player:get_player_name()
@@ -45,15 +64,22 @@ function helicopter.attach(self, player)
             {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
     self.object:set_animation_frame_speed(60)
 
+
     -- attach the driver
     player:set_attach(self.pilot_seat_base, "", {x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
-    player:set_eye_offset({x = 0, y = -4, z = 1}, {x = 0, y = 8, z = -30})
+    if helicopter.detect_player_api(player) == 0 then
+        player:set_eye_offset({x = 0, y = -4, z = 1}, {x = 0, y = 8, z = -30})
+    else
+        player:set_eye_offset({x = 0, y = 2, z = 1}, {x = 0, y = 8, z = -30})
+    end
     player_api.player_attached[name] = true
+    player_api.set_animation(player, "sit")
     -- make the driver sit
     minetest.after(0.2, function()
         local player = minetest.get_player_by_name(name)
         if player then
-	        player_api.set_animation(player, "sit")
+	        --player_api.set_animation(player, "sit")
+            player:set_animation({x =  81, y = 160},30, 0, true)
             update_heli_hud(player)
         end
     end)
@@ -94,13 +120,18 @@ function helicopter.attach_pax(self, player)
     self._passenger = name
     -- attach the passenger
     player:set_attach(self.passenger_seat_base, "", {x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
-    player:set_eye_offset({x = 0, y = -4, z = 1}, {x = 0, y = 8, z = -5})
+    if helicopter.detect_player_api(player) == 0 then
+        player:set_eye_offset({x = 0, y = -4, z = 1}, {x = 0, y = 8, z = -5})
+    else
+        player:set_eye_offset({x = 0, y = 2, z = 1}, {x = 0, y = 8, z = -5})
+    end
     player_api.player_attached[name] = true
+    player_api.set_animation(player, "sit")
     -- make the driver sit
     minetest.after(0.2, function()
         local player = minetest.get_player_by_name(name)
         if player then
-            player_api.set_animation(player, "sit")
+            player:set_animation({x =  81, y = 160},30, 0, true)
         end
     end)
 end
