@@ -49,7 +49,7 @@ minetest.register_entity("nss_helicopter:heli", {
 		collisionbox = {-1,0,-1, 1,0.3,1},
 		selectionbox = {-1,0,-1, 1,0.3,1},
 		visual = "mesh",
-		mesh = "helicopter_heli.b3d",
+		mesh = "nss_helicopter_heli.b3d",
         backface_culling = false,
         textures = {"nss_helicopter_interior_black.png", "nss_helicopter_metal.png", "nss_helicopter_strips.png",
                 "nss_helicopter_painting.png", "nss_helicopter_black.png", "nss_helicopter_aluminum.png", "nss_helicopter_glass.png",
