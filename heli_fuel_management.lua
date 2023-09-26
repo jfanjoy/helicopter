@@ -10,7 +10,7 @@ initial_properties = {
 	pointable=false,
 	visual = "mesh",
 	mesh = "pointer.b3d",
-	textures = {"clay.png"},
+	textures = {"nss_helicopter_clay.png"},
 	},
 
 on_activate = function(self,std)

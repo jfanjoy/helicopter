@@ -5,17 +5,17 @@
 -- blades
 minetest.register_craftitem("nss_helicopter:blades",{
 	description = "Helicopter Blades",
-	inventory_image = "helicopter_blades_inv.png",
+	inventory_image = "nss_helicopter_blades_inv.png",
 })
 -- cabin
 minetest.register_craftitem("nss_helicopter:cabin",{
 	description = "Cabin for Helicopter",
-	inventory_image = "helicopter_cabin_inv.png",
+	inventory_image = "nss_helicopter_cabin_inv.png",
 })
 -- heli
 minetest.register_craftitem("nss_helicopter:heli", {
 	description = "Helicopter",
-	inventory_image = "helicopter_heli_inv.png",
+	inventory_image = "nss_helicopter_heli_inv.png",
 
 	on_place = function(itemstack, placer, pointed_thing)
 		if pointed_thing.type ~= "node" then

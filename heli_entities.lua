@@ -27,7 +27,7 @@ initial_properties = {
 	pointable=false,
 	visual = "mesh",
 	mesh = "seat_base.b3d",
-    textures = {"helicopter_black.png",},
+    textures = {"nss_helicopter_black.png",},
 	},
 
     on_activate = function(self,std)
@@ -51,10 +51,10 @@ minetest.register_entity("nss_helicopter:heli", {
 		visual = "mesh",
 		mesh = "helicopter_heli.b3d",
         backface_culling = false,
-        textures = {"helicopter_interior_black.png", "helicopter_metal.png", "helicopter_strips.png",
-                "helicopter_painting.png", "helicopter_black.png", "helicopter_aluminum.png", "helicopter_glass.png",
-                "helicopter_interior.png", "helicopter_panel.png", "helicopter_colective.png", "helicopter_painting.png",
-                "helicopter_rotors.png", "helicopter_interior_black.png",},
+        textures = {"nss_helicopter_interior_black.png", "nss_helicopter_metal.png", "nss_helicopter_strips.png",
+                "nss_helicopter_painting.png", "nss_helicopter_black.png", "nss_helicopter_aluminum.png", "nss_helicopter_glass.png",
+                "nss_helicopter_interior.png", "nss_helicopter_panel.png", "nss_helicopter_colective.png", "nss_helicopter_painting.png",
+                "nss_helicopter_rotors.png", "nss_helicopter_interior_black.png",},
 	},
 
 	driver_name = nil,
@@ -181,7 +181,7 @@ minetest.register_entity("nss_helicopter:heli", {
             if impact > 5 then
                 --self.damage = self.damage + impact --sum the impact value directly to damage meter
                 local curr_pos = self.object:get_pos()
-                minetest.sound_play("collision", {
+                minetest.sound_play("nssh_collision", {
                     to_player = self.driver_name,
 	                --pos = curr_pos,
 	                --max_hear_distance = 5,
@@ -281,7 +281,7 @@ minetest.register_entity("nss_helicopter:heli", {
 					    --mobkit.hurt(self,toolcaps.damage_groups.fleshy - 1)
 					    --mobkit.make_sound(self,'hit')
                         self.hp_max = self.hp_max - 10
-                        minetest.sound_play("collision", {
+                        minetest.sound_play("nssh_collision", {
 	                        object = self.object,
 	                        max_hear_distance = 5,
 	                        gain = 1.0,

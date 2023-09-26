@@ -11,13 +11,13 @@ function helicopter.paint(self, colstr)
         self.color = colstr
         local l_textures = self.initial_properties.textures
         for _, texture in ipairs(l_textures) do
-            local i,indx = texture:find('helicopter_painting.png')
+            local i,indx = texture:find('nss_helicopter_painting.png')
             if indx then
-                l_textures[_] = "helicopter_painting.png^[multiply:".. colstr
+                l_textures[_] = "nss_helicopter_painting.png^[multiply:".. colstr
             end
-            local i,indx = texture:find('helicopter_colective.png')
+            local i,indx = texture:find('nss_helicopter_colective.png')
             if indx then
-                l_textures[_] = "helicopter_colective.png^[multiply:".. colstr
+                l_textures[_] = "nss_helicopter_colective.png^[multiply:".. colstr
             end
         end
 	    self.object:set_properties({textures=l_textures})
@@ -60,7 +60,7 @@ function helicopter.attach(self, player)
     self.driver_name = name
 
     -- sound and animation
-    self.sound_handle = minetest.sound_play({name = "helicopter_motor"},
+    self.sound_handle = minetest.sound_play({name = "nssh_motor"},
             {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
     self.object:set_animation_frame_speed(60)
 
