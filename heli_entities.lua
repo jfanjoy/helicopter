@@ -342,7 +342,7 @@ minetest.register_entity("nss_helicopter:heli", {
             self.owner = name
         end
 
-        if self.owner == name then
+        if self.owner == name or minetest.check_player_privs(clicker, {protection_bypass=true}) then
 		    if name == self.driver_name then
 			    -- driver clicked the object => driver gets off the vehicle
                 helicopter.dettach(self, clicker)
