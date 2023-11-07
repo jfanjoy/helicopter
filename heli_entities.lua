@@ -129,6 +129,7 @@ minetest.register_entity("nss_helicopter:heli", {
 
 		touching_ground, liquid_below = helicopter.check_node_below(self.object)
 		vel = helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel) or vel
+        helicopter.sound_and_animation_manager(self)
 
 		if vel.x == 0 and vel.y == 0 and vel.z == 0 then
 			return
@@ -215,8 +216,7 @@ minetest.register_entity("nss_helicopter:heli", {
             if can_stop then
                 --detach player
                 if self.sound_handle ~= nil then
-	                minetest.sound_stop(self.sound_handle)
-	                self.sound_handle = nil
+                    helicopter.sound_and_animation_manager(self)
 
                     --why its here? cause if the sound is attached, player must so
                     local player_owner = minetest.get_player_by_name(self.owner)

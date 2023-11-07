@@ -59,12 +59,6 @@ function helicopter.attach(self, player)
     local name = player:get_player_name()
     self.driver_name = name
 
-    -- sound and animation
-    self.sound_handle = minetest.sound_play({name = "nssh_motor"},
-            {object = self.object, gain = 2.0, max_hear_distance = 32, loop = true,})
-    self.object:set_animation_frame_speed(60)
-
-
     -- attach the driver
     player:set_attach(self.pilot_seat_base, "", {x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
     if helicopter.detect_player_api(player) == 0 then
@@ -94,14 +88,6 @@ function helicopter.dettach(self, player)
 
     -- driver clicked the object => driver gets off the vehicle
     self.driver_name = nil
-
-    -- sound and animation
-    if self.sound_handle then
-        minetest.sound_stop(self.sound_handle)
-        self.sound_handle = nil
-    end
-    
-    self.object:set_animation_frame_speed(0)
 
     -- detach the player
     player:set_detach()
@@ -192,4 +178,36 @@ function helicopter.destroy(self, puncher)
     minetest.add_item({x=pos.x+math.random()-0.5,y=pos.y,z=pos.z+math.random()-0.5},'default:steelblock')
     minetest.add_item({x=pos.x+math.random()-0.5,y=pos.y,z=pos.z+math.random()-0.5},'default:copperblock')
     minetest.add_item({x=pos.x+math.random()-0.5,y=pos.y,z=pos.z+math.random()-0.5},'nss_helicopter:blades')
+end
+
+local function turn_on(self)
+    if self.sound_handle == nil then
+        self.sound_handle = minetest.sound_play({name = "nssh_motor"},
+                {object = self.object,
+                gain = 2.0,
+                max_hear_distance = 32,
+                loop = true,}
+            )
+        self.object:set_animation_frame_speed(60)
+    end
+end
+
+function helicopter.sound_and_animation_manager(self)
+    local touching_ground, liquid_below = helicopter.check_node_below(self.object)
+    if not self.driver_name then
+        --no pilot
+        if (touching_ground or liquid_below) then
+            if self.sound_handle ~= nil then
+                minetest.sound_stop(self.sound_handle)
+                self.sound_handle = nil
+            end
+            self.object:set_animation_frame_speed(0)
+        else
+            turn_on(self)
+        end
+    else
+        if self.sound_handle == nil then
+            turn_on(self)
+        end
+    end
 end

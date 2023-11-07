@@ -42,11 +42,6 @@ function helicopter.heli_control(self, dtime, touching_ground, liquid_below, vel
 	if not driver then
 		-- there is no driver (eg. because driver left)
 		self.driver_name = nil
-		if self.sound_handle then
-			minetest.sound_stop(self.sound_handle)
-			self.sound_handle = nil
-		end
-		self.object:set_animation_frame_speed(0)
 		-- gravity
 		self.object:set_acceleration(vector.multiply(helicopter.vector_up, -helicopter.gravity))
 		return
