@@ -66,7 +66,6 @@ if minetest.get_modpath("default") then
 			{"",                    "default:steel_ingot", ""},
 		}
 	})
---[[
 	minetest.register_craft({
 		output = "nss_helicopter:cabin",
 		recipe = {
@@ -75,7 +74,6 @@ if minetest.get_modpath("default") then
 			{"default:steelblock", "xpanes:bar_flat", "xpanes:bar_flat"},
 		}
 	})
-]]
 	minetest.register_craft({
 		output = "nss_helicopter:heli",
 		recipe = {
