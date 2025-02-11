@@ -4,6 +4,18 @@
 
 helicopter = {}
 
+helicopter.S = nil
+
+if(minetest.get_translator ~= nil) then
+    helicopter.S = minetest.get_translator(minetest.get_current_modname())
+
+else
+    helicopter.S = function ( s ) return s end
+
+end
+
+local S = helicopter.S
+
 helicopter.friction_air_quadratic = 0.01
 helicopter.friction_air_constant = 0.2
 helicopter.friction_land_quadratic = 1

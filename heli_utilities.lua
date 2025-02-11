@@ -1,3 +1,4 @@
+local S = helicopter.S
 
 helicopter.vector_up = vector.new(0, 1, 0)
 
@@ -30,7 +31,7 @@ function helicopter.setText(self)
        "%.2f", self.hp_max
     )
     if properties then
-        properties.infotext = "Nice helicopter of " .. self.owner .. ". Current hp: " .. formatted
+        properties.infotext = S("Nice helicopter of @1. Current hp: @2", self.owner, formatted)
         self.object:set_properties(properties)
     end
 end

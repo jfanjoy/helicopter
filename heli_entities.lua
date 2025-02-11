@@ -1,6 +1,7 @@
 --
 -- entity
 --
+local S = helicopter.S
 
 -- supported colors
 local color_def = {
@@ -65,7 +66,7 @@ minetest.register_entity("nss_helicopter:heli", {
     energy = 0.001,
     owner = "",
     static_save = true,
-    infotext = "A nice helicopter",
+    infotext = S("A nice helicopter"),
     last_vel = vector.new(),
     hp_max = 50,
     color = "#0063b0",
@@ -92,7 +93,7 @@ minetest.register_entity("nss_helicopter:heli", {
             self.driver_name = data.stored_driver_name
             --minetest.debug("loaded: ", self.energy)
             local properties = self.object:get_properties()
-            properties.infotext = data.stored_owner .. " nice helicopter"
+            properties.infotext = data.stored_owner .. S(" nice helicopter")
             self.object:set_properties(properties)
         end
 
@@ -306,12 +307,12 @@ minetest.register_entity("nss_helicopter:heli", {
 
                     local color_name = color_def[self.color:lower()]
                     if color_name then
-                        imeta:set_string("description", color_name .. " Helicopter")
+                        imeta:set_string("description", color_name .. S(" Helicopter"))
                     end
 
                     if not pinv:room_for_item("main", stack) then
                         minetest.chat_send_player(puncher:get_player_name(),
-                            "You do not have room in your inventory")
+                            S("You do not have room in your inventory"))
                     else
                         if self.pointer then self.pointer:remove() end
                         if self.pilot_seat_base then self.pilot_seat_base:remove() end

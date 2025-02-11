@@ -1,20 +1,21 @@
 --
 -- items
 --
+local S = helicopter.S
 
 -- blades
 minetest.register_craftitem("nss_helicopter:blades",{
-	description = "Helicopter Blades",
+	description = S("Helicopter Blades"),
 	inventory_image = "nssh_blades_inv.png",
 })
 -- cabin
 minetest.register_craftitem("nss_helicopter:cabin",{
-	description = "Cabin for Helicopter",
+	description = S("Cabin for Helicopter"),
 	inventory_image = "nssh_cabin_inv.png",
 })
 -- heli
 minetest.register_craftitem("nss_helicopter:heli", {
-	description = "Helicopter",
+	description = S("Helicopter"),
 	inventory_image = "nssh_heli_inv.png",
 
 	on_place = function(itemstack, placer, pointed_thing)
@@ -41,7 +42,7 @@ minetest.register_craftitem("nss_helicopter:heli", {
 		end
 
 		local properties = ent.object:get_properties()
-		properties.infotext = owner .. " nice helicopter"
+		properties.infotext = owner .. S(" nice helicopter")
 		ent.object:set_properties(properties)
 
 		if not (helicopter.creative and placer and
